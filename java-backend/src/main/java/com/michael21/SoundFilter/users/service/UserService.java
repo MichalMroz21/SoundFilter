@@ -25,6 +25,6 @@ public class UserService {
     }
 
     private void sendVerificationEmail(User user) {
-
+        
     }
 }
