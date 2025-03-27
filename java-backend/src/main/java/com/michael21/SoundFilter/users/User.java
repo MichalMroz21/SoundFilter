@@ -27,7 +27,7 @@ public class User extends AbstractEntity {
     private Role role;
 
     @Setter
-    @OneToOne(mappedBy = "User")
+    @OneToOne(mappedBy = "user")
     private VerificationCode verificationCode;
 
     public User(CreateUserRequest data){

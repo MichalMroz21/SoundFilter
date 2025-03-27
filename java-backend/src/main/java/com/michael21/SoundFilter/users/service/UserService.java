@@ -9,6 +9,7 @@ import com.michael21.SoundFilter.users.repository.UserRepository;
 import com.michael21.SoundFilter.users.repository.VerificationCodeRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.jobrunr.scheduling.BackgroundJobRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

@@ -45,7 +45,7 @@ public class SendWelcomeEmailJobHandler implements JobRequestHandler<SendWelcome
         thymeleafContext.setVariable("verificationLink", verificationLink);
         thymeleafContext.setVariable("applicationName", applicationProperties.getApplicationName());
 
-        String htmlBody = templateEngine.process("welcomeEmail", thymeleafContext);
+        String htmlBody = templateEngine.process("welcome-email", thymeleafContext);
 
         emailService.sendHtmlMessage(List.of(user.getEmail()), "Welcome to our platform", htmlBody);
 

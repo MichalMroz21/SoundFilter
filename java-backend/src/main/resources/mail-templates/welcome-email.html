@@ -8,7 +8,7 @@
   <title>Document</title>
 </head>
 <body>
-  <p th:text="'Hi' + ${user.firstName} + '!'"></p>
+  <p th:text="'Hi ' + ${user.firstName} + '!'"></p>
   <p th:text="'Welcome to ' + ${applicationName} + ', please click the link below so we can verify your email.'"></p>
   <a th:href="@{${verificationLink}}">Verify email</a>
 </body>
