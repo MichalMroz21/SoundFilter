@@ -6,8 +6,10 @@ import com.michael21.SoundFilter.util.ApplicationContextProvider;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.OneToOne;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Entity
@@ -23,6 +25,10 @@ public class User extends AbstractEntity {
 
     @Enumerated(EnumType.STRING)
     private Role role;
+
+    @Setter
+    @OneToOne(mappedBy = "User")
+    private VerificationCode verificationCode;
 
     public User(CreateUserRequest data){
         PasswordEncoder passwordEncoder = ApplicationContextProvider.bean(PasswordEncoder.class);

@@ -13,4 +13,6 @@ import java.util.List;
 @Getter
 public class ApplicationProperties {
     private List<String> allowedOrigins;
+    private String applicationName;
+    private String baseUrl;
 }
