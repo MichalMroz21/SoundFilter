@@ -1,0 +1,44 @@
+{
+	"info": {
+		"_postman_id": "c4447351-ad16-4b9c-b01b-13dd586f1af5",
+		"name": "API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "29607378"
+	},
+	"item": [
+		{
+			"name": "UsersController",
+			"item": [
+				{
+					"name": "create",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"disenchantedcard@gmail.com\",\r\n    \"password\": \"password123!\",\r\n    \"passwordConfirmation\": \"password123!\",\r\n    \"firstName\": \"Michael\",\r\n    \"lastName\": \"W\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/users",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"users"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
