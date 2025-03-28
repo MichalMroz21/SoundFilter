@@ -2,15 +2,23 @@ package com.michael21.SoundFilter.auth;
 
 import com.michael21.SoundFilter.config.ApplicationProperties;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.ProviderManager;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.logout.LogoutFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 
@@ -23,12 +31,33 @@ import static org.springframework.security.web.util.matcher.AntPathRequestMatche
 @RequiredArgsConstructor
 public class SecurityConfiguration {
     private final ApplicationProperties applicationProperties;
+    private final UserDetailsService userDetailsService;
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http, CorsConfigurationSource corsConfigurationSource) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, CorsConfigurationSource corsConfigurationSource, UserDetailsService userDetailsService) throws Exception {
         http.authorizeHttpRequests(customizer -> {
-           customizer.requestMatchers(antMatcher(HttpMethod.POST, "/api/users")).permitAll();
+           customizer.requestMatchers(antMatcher(HttpMethod.POST, "/api/users")).permitAll()
+                   .requestMatchers(antMatcher(HttpMethod.POST, "/api/auth/login")).permitAll()
+                   .requestMatchers(antMatcher(HttpMethod.GET, "/api/users/verify-email")).permitAll()
+                   .anyRequest().authenticated(); //any other request requires authentication
         });
+
+        http.exceptionHandling(customizer -> {
+            customizer.authenticationEntryPoint(
+                    (request, response, authException) -> {
+                        String acceptHeader = request.getHeader(HttpHeaders.ACCEPT);
+                        if (acceptHeader != null && acceptHeader.contains("application/json")) {
+                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                            response.getWriter().write("{\"error\":\"Authentication required\"}");
+                        } else {
+                            response.sendRedirect(applicationProperties.getLoginPageUrl());
+                        }
+                    });
+        });
+
+
+        http.addFilterBefore(new UsernamePasswordAuthenticationFilter(), LogoutFilter.class);
+        http.userDetailsService(userDetailsService);
 
         http.csrf(csrf -> {
            csrf.disable(); //TODO: implement csrf protection
@@ -59,5 +88,14 @@ public class SecurityConfiguration {
                 return config;
             }
         };
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(UserDetailsService userDetailsService) {
+        DaoAuthenticationProvider daoAuthenticationProvider = new DaoAuthenticationProvider();
+        daoAuthenticationProvider.setUserDetailsService(userDetailsService);
+        daoAuthenticationProvider.setPasswordEncoder(passwordEncoder());
+
+        return new ProviderManager(daoAuthenticationProvider);
     }
 }

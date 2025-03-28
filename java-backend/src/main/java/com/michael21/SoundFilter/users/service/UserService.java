@@ -7,6 +7,9 @@ import com.michael21.SoundFilter.users.data.UserResponse;
 import com.michael21.SoundFilter.users.jobs.SendWelcomeEmailJob;
 import com.michael21.SoundFilter.users.repository.UserRepository;
 import com.michael21.SoundFilter.users.repository.VerificationCodeRepository;
+import com.michael21.SoundFilter.util.exception.ApiException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,5 +39,17 @@ public class UserService {
         verificationCodeRepository.save(verificationCode);
         SendWelcomeEmailJob sendWelcomeEmailJob = new SendWelcomeEmailJob(user.getId());
         BackgroundJobRequest.enqueue(sendWelcomeEmailJob);
+    }
+
+    @Transactional
+    public void verifyEmail(String code){
+        VerificationCode verificationCode = verificationCodeRepository.findByCode(code)
+                .orElseThrow(() -> ApiException.builder().status(HttpServletResponse.SC_BAD_REQUEST).message("Invalid verification code").build());
+        User user = verificationCode.getUser();
+
+        user.setVerified(true);
+        userRepository.save(user); //update user information in db
+
+        verificationCodeRepository.delete(verificationCode);
     }
 }
