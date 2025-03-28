@@ -2,6 +2,7 @@ package com.michael21.SoundFilter.users;
 
 import com.michael21.SoundFilter.entity.AbstractEntity;
 import com.michael21.SoundFilter.users.data.CreateUserRequest;
+import com.michael21.SoundFilter.users.data.UpdateUserRequest;
 import com.michael21.SoundFilter.util.ApplicationContextProvider;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -13,6 +14,7 @@ import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Collection;
@@ -57,6 +59,16 @@ public class User extends AbstractEntity implements UserDetails {
 
     @Override  //change to return verified if user cant login before verifying email
     public boolean isEnabled() { return verified; }
+
+    public void updatePassword(String password) {
+        PasswordEncoder encoder = ApplicationContextProvider.bean(PasswordEncoder.class);
+        this.password = encoder.encode(password);
+    }
+
+    public void update(UpdateUserRequest request) {
+        this.firstName = request.getFirstName();
+        this.lastName = request.getLastName();
+    }
 
     public User(CreateUserRequest data){
         PasswordEncoder passwordEncoder = ApplicationContextProvider.bean(PasswordEncoder.class);

@@ -28,6 +28,13 @@ services:
       HP_DATABASE: /data/mailpit.db
       HP_SMTP_AUTH_ACCEPT_ANY: 1
       HP_SMTP_AUTH_ALLOW_INSECURE: 1
+  caddy:
+    image: caddy:latest
+    volumes:
+      - ./Caddyfile:/etc/Caddy/Caddyfile
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
 networks:
   app_net:
     driver: bridge
