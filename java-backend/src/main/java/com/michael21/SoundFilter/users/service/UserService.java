@@ -1,6 +1,9 @@
 package com.michael21.SoundFilter.users.service;
 
 import com.michael21.SoundFilter.auth.SecurityUtil;
+import com.michael21.SoundFilter.s3.UploadedFile;
+import com.michael21.SoundFilter.s3.repository.UploadedFileRepository;
+import com.michael21.SoundFilter.s3.service.FileUploadService;
 import com.michael21.SoundFilter.users.PasswordResetToken;
 import com.michael21.SoundFilter.users.User;
 import com.michael21.SoundFilter.users.VerificationCode;
@@ -24,6 +27,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 @Service
 @RequiredArgsConstructor
@@ -31,7 +37,9 @@ public class UserService {
     private final UserRepository userRepository;
     private final VerificationCodeRepository verificationCodeRepository;
     private final PasswordResetTokenRepository passwordResetTokenRepository;
+    private final UploadedFileRepository uploadedFileRepository;
     private final PasswordEncoder passwordEncoder;
+    private final FileUploadService fileUploadService;
 
     @Transactional
     public UserResponse create(@Valid CreateUserRequest request) {
@@ -106,6 +114,26 @@ public class UserService {
 
         user.updatePassword(request.getPassword());
         user = userRepository.save(user);
+        return new UserResponse(user);
+    }
+
+    @Transactional
+    public UserResponse updateProfilePicture(Long id, MultipartFile file) {
+        User user = SecurityUtil.getAuthenticatedUser();
+        UploadedFile uploadedFile = new UploadedFile(file.getOriginalFilename(), file.getSize(), user);
+        try {
+            String url = fileUploadService.uploadFile(
+                    uploadedFile.buildPath("profile-picture"),
+                    file.getBytes()
+            );
+            uploadedFile.onUploaded(url);
+            user.setProfileImageUrl(url);
+            userRepository.save(user);
+            uploadedFileRepository.save(uploadedFile);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
         return new UserResponse(user);
     }
 }

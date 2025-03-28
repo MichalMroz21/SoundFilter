@@ -6,8 +6,10 @@ import com.michael21.SoundFilter.users.data.*;
 import com.michael21.SoundFilter.users.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.apache.coyote.Response;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.view.RedirectView;
 
 @RestController
@@ -50,6 +52,13 @@ public class UserController {
     @PatchMapping("/password")
     public ResponseEntity<UserResponse> updatePassword(@Valid @RequestBody UpdateUserPasswordRequest requestDTO) {
         UserResponse user = userService.updatePassword(requestDTO);
+        return ResponseEntity.ok(user);
+    }
+
+    @PatchMapping("/{id}/profile-picture")
+    public ResponseEntity<UserResponse> updateProfilePicture(
+            @PathVariable Long id, @RequestParam("file") MultipartFile file) {
+        UserResponse user = userService.updateProfilePicture(id, file);
         return ResponseEntity.ok(user);
     }
 }
