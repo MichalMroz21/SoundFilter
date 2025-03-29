@@ -16,11 +16,13 @@ export default function Navbar({ className, ...props}: NavbarProps) {
                 <Logo/>
 
                 <div className="flex gap-x-2 items-center">
-                    <ModeToggle/>
 
                     <Link href={"/auth/login"}>
                         <Button variant={"outline"}>Login</Button>
                     </Link>
+
+                    <ModeToggle/>
+                    
                 </div>
             </Container>
         </div>
