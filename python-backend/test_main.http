@@ -1,0 +1,6 @@
+# Test your FastAPI endpoints
+
+GET http://localhost:8080/audio-api/s/
+Accept: application/json
+
+###

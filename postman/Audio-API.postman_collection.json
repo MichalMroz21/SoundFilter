@@ -1,0 +1,18 @@
+{
+	"info": {
+		"_postman_id": "c43eb43f-2a9a-4413-9c55-57e429058373",
+		"name": "Audio-API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "29607378"
+	},
+	"item": [
+		{
+			"name": "name",
+			"request": {
+				"method": "GET",
+				"header": []
+			},
+			"response": []
+		}
+	]
+}

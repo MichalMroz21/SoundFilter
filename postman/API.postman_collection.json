@@ -225,6 +225,34 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "updateProfilePicture",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "http:/localhost:8080/api/users/:id/profile-picture",
+							"host": [
+								"http"
+							],
+							"port": "",
+							"path": [
+								"localhost:8080",
+								"api",
+								"users",
+								":id",
+								"profile-picture"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		},

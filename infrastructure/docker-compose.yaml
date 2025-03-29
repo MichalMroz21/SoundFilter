@@ -29,7 +29,7 @@ services:
       HP_SMTP_AUTH_ACCEPT_ANY: 1
       HP_SMTP_AUTH_ALLOW_INSECURE: 1
   caddy:
-    image: caddy:2.4.1
+    image: caddy:latest
     container_name: caddy
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile
