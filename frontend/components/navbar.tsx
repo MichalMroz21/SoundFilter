@@ -1,10 +1,10 @@
 import { cn } from "@/lib/utils";
-import { Container, Link } from "lucide-react";
-import { ModeToggle } from "./mode-toggle";
 import { Button } from "./ui/button";
 import React from "react";
 import Logo from "./logo";
-
+import Container from "./container";
+import ModeToggle from "./mode-toggle";
+import Link from "next/link";
 
 interface NavbarProps extends React.HTMLAttributes<HTMLDivElement> {}
 export default function Navbar({ className, ...props}: NavbarProps) {

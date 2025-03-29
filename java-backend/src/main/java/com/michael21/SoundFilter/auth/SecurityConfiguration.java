@@ -13,6 +13,7 @@ import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -36,7 +37,7 @@ public class SecurityConfiguration {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, CorsConfigurationSource corsConfigurationSource, UserDetailsService userDetailsService) throws Exception {
         http.authorizeHttpRequests(customizer -> {
-           customizer.requestMatchers(antMatcher(HttpMethod.POST, "/api/users")).permitAll()
+            customizer.requestMatchers(antMatcher(HttpMethod.POST, "/api/users")).permitAll()
                    .requestMatchers(antMatcher(HttpMethod.POST, "/api/auth/login")).permitAll()
                    .requestMatchers(antMatcher(HttpMethod.POST, "/api/users/forgot-password")).permitAll()
                    .requestMatchers(antMatcher(HttpMethod.GET, "/api/users/verify-email")).permitAll()

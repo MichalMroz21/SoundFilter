@@ -4,7 +4,7 @@ http://localhost:8080 {
     }
 
     route /oauth2/authorization/* {
-        reserve_proxy http://host.docker.internal:8081
+        reverse_proxy http://host.docker.internal:8081
     }
 
     route /login/oauth2/code/* {

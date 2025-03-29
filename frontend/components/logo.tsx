@@ -7,5 +7,5 @@ export default function Logo() {
         <Link href={"/"}>
             <img src="/images/logo.png" alt="soundfilter logo" className="w-10 h-10 rounded-md"></img>
         </Link>
-    );
+    )
 }

@@ -29,9 +29,10 @@ services:
       HP_SMTP_AUTH_ACCEPT_ANY: 1
       HP_SMTP_AUTH_ALLOW_INSECURE: 1
   caddy:
-    image: caddy:latest
+    image: caddy:2.4.1
+    container_name: caddy
     volumes:
-      - ./Caddyfile:/etc/Caddy/Caddyfile
+      - ./Caddyfile:/etc/caddy/Caddyfile
     ports:
       - "8080:8080"
     restart: unless-stopped
