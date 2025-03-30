@@ -5,9 +5,12 @@ import Logo from "./logo";
 import Container from "./container";
 import ModeToggle from "./mode-toggle";
 import Link from "next/link";
+import { useAuthGuard } from "@/lib/auth/use-auth";
 
 interface NavbarProps extends React.HTMLAttributes<HTMLDivElement> {}
 export default function Navbar({ className, ...props}: NavbarProps) {
+    const { user } = useAuthGuard({ middleware: "guest" })
+
     return (
         <div className={cn(
             className
@@ -22,7 +25,7 @@ export default function Navbar({ className, ...props}: NavbarProps) {
                     </Link>
 
                     <ModeToggle/>
-                    
+
                 </div>
             </Container>
         </div>

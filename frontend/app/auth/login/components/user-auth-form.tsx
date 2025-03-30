@@ -8,9 +8,10 @@ import { useAuthGuard } from "@/lib/auth/use-auth";
 import { HttpErrorResponse } from "@/models/http/HttpErrorResponse";
 import ErrorFeedback from "@/components/error-feedback";
 import Link from "next/link";
-import { FaGithub, FaGoogle} from "react-icons/fa";
 import { Button, TextInput } from "@mantine/core";
-import { useForm, zodResolver } from "@mantine/form";
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Label } from "@/components/ui/label";
 
 interface UserAuthFormProps extends React.HTMLAttributes<HTMLDivElement> {}
 
@@ -21,6 +22,7 @@ const loginFormSchema = z.object({
 
 type Schema = z.infer<typeof loginFormSchema>;
 export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
+
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
   const {login} = useAuthGuard({middleware: 'guest', redirectIfAuthenticated: '/profile'});
   const [errors, setErrors] = React.useState<HttpErrorResponse | undefined>(undefined);
@@ -37,20 +39,17 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
     })
   }
 
-  const form = useForm({
-    initialValues: { email: "", password: "" },
-    validate: zodResolver(loginFormSchema),
-  })
-
-  function getProviderLoginUrl(provider: 'google' | 'facebook' | 'github' | 'okta') {
-    return process.env.NEXT_PUBLIC_BASE_URL + `/oauth2/authorization/${provider}`
-  }
+  const { register, handleSubmit, formState } = useForm<Schema>({
+    resolver: zodResolver(loginFormSchema),
+    reValidateMode: "onSubmit"
+  });
 
   return (
     <div className="grid gap-6">
-      <form onSubmit={form.onSubmit(onSubmit)}>
+      <form onSubmit={handleSubmit(onSubmit)}>
         <div className="grid gap-2">
           <div className="grid gap-2">
+            <Label htmlFor="email">Email</Label>
             <TextInput
               id="email"
               placeholder="name@example.com"
@@ -60,9 +59,15 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
               autoCorrect="off"
               disabled={isLoading}
               label="Email"
-              {...form.getInputProps("email")}
+              {...register("email")}
             />
+            {formState.errors.email && (
+                <small className="text-red-600">
+                    {formState.errors.email.message}
+                </small>
+            )}
 
+            <Label htmlFor="password">Password</Label>
             <TextInput
               id="password"
               type="password"
@@ -70,10 +75,14 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
               autoCorrect="off"
               disabled={isLoading}
               label="Password"
-              {...form.getInputProps("password")}
+              {...register("password")}
             />
           </div>
-
+          {formState.errors.password && (
+                <small className="text-red-600">
+                    {formState.errors.password.message}
+                </small>
+            )}
           <ErrorFeedback data={errors} />
           
           <Button disabled={isLoading} type="submit">
@@ -88,22 +97,6 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
             Or continue with
           </span>
         </div>
-      </div>
-
-      <div className="flex flex-col gap-y-2">
-        <Link href={getProviderLoginUrl('github')}>
-          <Button variant="default" type="button" disabled={isLoading} className="w-full" fullWidth>
-            <FaGithub className="mr-2 h-4 w-4" />
-            GitHub
-          </Button>
-        </Link>
-        
-        <Link href={getProviderLoginUrl('google')}>
-          <Button variant="default" type="button" disabled={isLoading} className="w-full" fullWidth>
-            <FaGoogle className="mr-2 h-4 w-4" />
-            Google
-          </Button>
-        </Link>
       </div>
     </div>
   );
