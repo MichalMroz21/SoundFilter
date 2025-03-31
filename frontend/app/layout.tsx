@@ -4,6 +4,7 @@ import { Lato } from 'next/font/google';
 import { cn } from "@/lib/utils";
 import "./globals.css";
 import Navbar from "@/components/navbar";
+import { MantineProvider } from "@mantine/core";
 
 export const metadata: Metadata = {
   title: "SoundFilter",
@@ -32,9 +33,9 @@ export default function RootLayout({ children, }: Readonly<{ children: React.Rea
             disableTransitionOnChange
           >           
             <Navbar className="h-[70px] sticky top-0"/>
-            <main>
+            <MantineProvider>
               {children}
-            </main>     
+            </MantineProvider>     
           </ThemeProvider>
         </body>
       </html>
