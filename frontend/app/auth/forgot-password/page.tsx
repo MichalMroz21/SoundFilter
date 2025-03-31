@@ -60,6 +60,7 @@ export default function ForgotPasswordPage() {
 
         <div className="bg-card border rounded-xl shadow-sm p-6 sm:p-8">
           <div className="grid gap-6">
+
             <SuccessFeedback
               show={success}
               message="Password reset email sent"
@@ -116,6 +117,7 @@ export default function ForgotPasswordPage() {
                 </div>
               </form>
             )}
+
           </div>
         </div>
 
@@ -125,6 +127,7 @@ export default function ForgotPasswordPage() {
           <Link href="/auth/login" className="text-primary hover:underline font-medium">
             Back to login
           </Link>
+          
         </div>
 
       </div>

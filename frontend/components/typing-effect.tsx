@@ -25,6 +25,7 @@ export default function TypingEffect({ text, className = "", speed = 50, delay =
     if (!isTyping) return
 
     let currentIndex = 0
+    
     const interval = setInterval(() => {
       if (currentIndex <= text.length) {
         setDisplayText(text.substring(0, currentIndex))

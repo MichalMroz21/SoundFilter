@@ -142,7 +142,6 @@ export function UserRegisterForm({ className, ...props }: UserAuthFormProps) {
 
             </div>
 
-            {/* Password Confirmation Field */}
             <div className="space-y-2">
               <Label htmlFor="passwordConfirmation" className="text-sm font-medium">
                 Confirm password
@@ -152,6 +151,7 @@ export function UserRegisterForm({ className, ...props }: UserAuthFormProps) {
                 <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                   <KeyIcon className="h-4 w-4 text-muted-foreground" />
                 </div>
+
                 <Input
                   id="passwordConfirmation"
                   type="password"
@@ -176,6 +176,7 @@ export function UserRegisterForm({ className, ...props }: UserAuthFormProps) {
                   <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                     <UserIcon className="h-4 w-4 text-muted-foreground" />
                   </div>
+
                   <Input
                     id="firstName"
                     type="text"
@@ -197,6 +198,7 @@ export function UserRegisterForm({ className, ...props }: UserAuthFormProps) {
                   <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                     <UserIcon className="h-4 w-4 text-muted-foreground" />
                   </div>
+                  
                   <Input
                     id="lastName"
                     type="text"
@@ -223,7 +225,7 @@ export function UserRegisterForm({ className, ...props }: UserAuthFormProps) {
               "Create account"
             )}
           </Button>
-          
+
         </div>
       </form>
     </div>

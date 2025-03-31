@@ -22,6 +22,7 @@ export default function FloatingElement({
         animation: `floating ${duration}s ease-in-out infinite`,
       }}
     >
+
       <style jsx>{`
         @keyframes floating {
           0%, 100% {
@@ -32,7 +33,9 @@ export default function FloatingElement({
           }
         }
       `}</style>
+
       {children}
+      
     </div>
   )
 }

@@ -1,3 +1,8 @@
+"use client"
+
+import { useEffect } from "react"
+import { useRouter } from "next/navigation"
+import { useAuthGuard } from "@/lib/auth/use-auth"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { AudioWaveformIcon, FileTextIcon, Edit3Icon, FilterIcon, FileTypeIcon, ShareIcon } from "lucide-react"
@@ -8,20 +13,32 @@ import FloatingElement from "@/components/floating-element"
 import type { ReactNode } from "react"
 
 export default function Home() {
+  const router = useRouter()
+  const { user} = useAuthGuard({ middleware: "guest" })
+
+  useEffect(() => {
+    if (user) {
+      router.push("/dashboard")
+    }
+  }, [user, router])
+
   return (
     <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
       <main className="flex flex-col gap-[32px] row-start-2 items-center w-full">
-
         <Container size="lg" className="px-4 relative z-10">
+
           <section className="w-full flex flex-col md:flex-row items-center gap-8 md:gap-16 mb-16">
             <div className="flex-1 space-y-6">
 
               <h1 className="text-4xl md:text-6xl font-bold tracking-tight">
                 <TypingEffect text="Audio to Text," speed={70} delay={300} />
+
                 <br />
+
                 <span className="text-primary">
                   <TypingEffect text="Filtered" speed={70} delay={1500} />
                 </span>
+
                 <TypingEffect text=" Your Way" speed={70} delay={2000} />
               </h1>
 
@@ -52,11 +69,11 @@ export default function Home() {
                 </div>
               </FloatingElement>
             </div>
-
           </section>
 
           <section className="w-full py-12">
             <h2 className="text-3xl font-bold text-center mb-12">How It Works</h2>
+
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               <StepCard
                 number="1"
@@ -77,10 +94,12 @@ export default function Home() {
                 description="Filter specific words, replace terms, or modify the transcription."
               />
             </div>
+
           </section>
 
           <section className="w-full py-12">
             <h2 className="text-3xl font-bold text-center mb-12">Powerful Features</h2>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <FeatureCard
                 icon={<FilterIcon className="h-10 w-10 text-primary" />}
@@ -103,6 +122,7 @@ export default function Home() {
                 description="Share your audio files and transcriptions with other users directly on the platform."
               />
             </div>
+
           </section>
 
           <section className="w-full py-16 flex flex-col items-center text-center">
@@ -110,12 +130,14 @@ export default function Home() {
             <p className="text-lg text-muted-foreground max-w-2xl mb-8">
               Join thousands of users who are saving time and improving their workflow with SoundFilter.
             </p>
+
             <Button size="lg" className="relative overflow-hidden group" asChild>
               <Link href="/auth/login">
                 Get Started Now
                 <span className="absolute inset-0 w-full h-full bg-white/10 transform -translate-x-full group-hover:translate-x-0 transition-transform duration-300"></span>
               </Link>
             </Button>
+
           </section>
 
         </Container>
@@ -124,7 +146,6 @@ export default function Home() {
       <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center text-sm text-muted-foreground relative z-10">
         <span>© {new Date().getFullYear()} SoundFilter</span>
       </footer>
-
     </div>
   )
 }
@@ -139,9 +160,11 @@ interface StepCardProps {
 function StepCard({ number, icon, title, description }: StepCardProps) {
   return (
     <Card className="p-6 flex flex-col items-center text-center hover:shadow-lg transition-shadow relative overflow-hidden group">
+      
       <div className="absolute -top-6 -left-6 w-16 h-16 bg-primary/10 rounded-full flex items-end justify-end">
         <span className="text-2xl font-bold text-primary mr-2 mb-2">{number}</span>
       </div>
+
       <div className="mb-4 mt-4 transform group-hover:scale-110 transition-transform duration-300">{icon}</div>
       <h3 className="text-xl font-semibold mb-2">{title}</h3>
       <p className="text-muted-foreground">{description}</p>

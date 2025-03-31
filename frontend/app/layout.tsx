@@ -22,10 +22,12 @@ export default function RootLayout({ children, }: Readonly<{ children: React.Rea
     <>
       <html lang="en" suppressHydrationWarning>
         <head />
+        
         <body className={cn(
           "min-h-screen bg-background font-sans antialiased",
           lato.className
         )}>
+
           <ThemeProvider
             attribute="class"
             defaultTheme="system"
@@ -37,6 +39,7 @@ export default function RootLayout({ children, }: Readonly<{ children: React.Rea
               {children}
             </MantineProvider>     
           </ThemeProvider>
+
         </body>
       </html>
     </>
