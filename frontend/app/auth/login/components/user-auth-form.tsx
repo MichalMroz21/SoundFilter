@@ -26,7 +26,7 @@ const loginFormSchema = z.object({
 type Schema = z.infer<typeof loginFormSchema>
 export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
   const [isLoading, setIsLoading] = React.useState<boolean>(false)
-  const { login } = useAuthGuard({ middleware: "guest", redirectIfAuthenticated: "/dashboard" })
+  const { login } = useAuthGuard({ middleware: "guest", redirectIfAuthenticated: "/auth/login-success" })
   const [errors, setErrors] = React.useState<HttpErrorResponse | undefined>(undefined)
 
   async function onSubmit(data: Schema) {
