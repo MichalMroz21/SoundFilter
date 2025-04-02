@@ -16,4 +16,5 @@ public class ApplicationProperties {
     private String applicationName;
     private String baseUrl;
     private String loginPageUrl;
+    private String loginSuccessUrl;
 }

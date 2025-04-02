@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-
+import Link from "next/link"
 import * as z from "zod"
 import { toast } from "sonner"
 import { useAuthGuard } from "@/lib/auth/use-auth"
@@ -13,6 +13,8 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Label } from "@/components/ui/label"
 import { AtSignIcon, KeyIcon, Loader2Icon } from "lucide-react"
+import { FaGithub } from "react-icons/fa"
+import { FaGoogle } from "react-icons/fa"
 
 interface UserAuthFormProps extends React.HTMLAttributes<HTMLDivElement> {}
 
@@ -44,13 +46,17 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
     reValidateMode: "onSubmit",
   })
 
+  function getProviderLoginUrl(provider: "google" | "facebook" | "github" | "okta") {
+    return process.env.NEXT_PUBLIC_BASE_URL + `/oauth2/authorization/${provider}`
+  }
+
   return (
     <div className="grid gap-6">
       <form onSubmit={handleSubmit(onSubmit)}>
         <div className="grid gap-4">
           <div className="space-y-4">
             <div className="space-y-2">
-
+              
               <Label htmlFor="email" className="text-sm font-medium">
                 Email address
               </Label>
@@ -71,13 +77,11 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
                   disabled={isLoading}
                   {...register("email")}
                 />
-
               </div>
 
               {formState.errors.email && (
                 <small className="text-destructive text-xs">{formState.errors.email.message}</small>
               )}
-
             </div>
 
             <div className="space-y-2">
@@ -106,7 +110,6 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
               {formState.errors.password && (
                 <small className="text-destructive text-xs">{formState.errors.password.message}</small>
               )}
-
             </div>
           </div>
 
@@ -133,6 +136,15 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
         <div className="relative flex justify-center text-xs uppercase">
           <span className="bg-card px-2 text-muted-foreground">Or continue with</span>
         </div>
+      </div>
+
+      <div className="flex flex-col gap-y-2">
+        <Button variant="outline" type="button" disabled={isLoading} className="w-full" asChild>
+          <Link href={getProviderLoginUrl("github")}>
+            <FaGithub className="mr-2 h-4 w-4" />
+            Github
+          </Link>
+        </Button>
       </div>
     </div>
   )

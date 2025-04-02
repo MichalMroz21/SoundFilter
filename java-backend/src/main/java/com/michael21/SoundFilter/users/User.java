@@ -4,10 +4,7 @@ import com.michael21.SoundFilter.entity.AbstractEntity;
 import com.michael21.SoundFilter.users.data.CreateUserRequest;
 import com.michael21.SoundFilter.users.data.UpdateUserRequest;
 import com.michael21.SoundFilter.util.ApplicationContextProvider;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -16,9 +13,12 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 
 @Entity
 @Getter
@@ -42,6 +42,9 @@ public class User extends AbstractEntity implements UserDetails {
     @Setter
     @OneToOne(mappedBy = "user")
     private VerificationCode verificationCode;
+
+    @OneToMany(mappedBy = "user", fetch = FetchType.EAGER)
+    private List<UserConnectedAccount> connectedAccounts = new ArrayList<>();
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -80,5 +83,26 @@ public class User extends AbstractEntity implements UserDetails {
         this.firstName = data.getFirstName();
         this.lastName = data.getLastName();
         this.role = Role.USER;
+    }
+
+    public User (OAuth2User oAuth2User) {
+        User user = new User();
+        user.email = oAuth2User.getAttribute("email");
+        String name = oAuth2User.getAttribute("name");
+        if (name != null) {
+            List<String> names = List.of(name.split(" "));
+            if (names.size() > 1) {
+                user.firstName = names.get(0);
+                user.lastName = names.get(1);
+            } else {
+                user.firstName = names.getFirst();
+            }
+        }
+        user.verified = true;
+        user.role = Role.USER;
+    }
+
+    public void addConnectedAccount(UserConnectedAccount connectedAccount) {
+        connectedAccounts.add(connectedAccount);
     }
 }

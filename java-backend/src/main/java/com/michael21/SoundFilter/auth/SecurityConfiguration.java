@@ -33,6 +33,7 @@ import static org.springframework.security.web.util.matcher.AntPathRequestMatche
 public class SecurityConfiguration {
     private final ApplicationProperties applicationProperties;
     private final UserDetailsService userDetailsService;
+    private final Oauth2LoginSuccessHandler oauth2LoginSuccessHandler;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, CorsConfigurationSource corsConfigurationSource, UserDetailsService userDetailsService) throws Exception {
@@ -43,6 +44,10 @@ public class SecurityConfiguration {
                    .requestMatchers(antMatcher(HttpMethod.GET, "/api/users/verify-email")).permitAll()
                    .requestMatchers(antMatcher(HttpMethod.PATCH, "/api/users/reset-password")).permitAll()
                    .anyRequest().authenticated(); //any other request requires authentication
+        });
+
+        http.oauth2Login(customizer -> {
+            customizer.successHandler(oauth2LoginSuccessHandler);
         });
 
         http.exceptionHandling(customizer -> {
