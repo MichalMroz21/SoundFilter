@@ -8,4 +8,4 @@ docker compose up -d
 ```
 npm run dev
 ```
-- in intellij run app (after doing docker)
+- in intellij run app (after doing docker).
