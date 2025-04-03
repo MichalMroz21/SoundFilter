@@ -121,6 +121,7 @@ public class UserService {
     public UserResponse updateProfilePicture(Long id, MultipartFile file) {
         User user = SecurityUtil.getAuthenticatedUser();
         UploadedFile uploadedFile = new UploadedFile(file.getOriginalFilename(), file.getSize(), user);
+
         try {
             String url = fileUploadService.uploadFile(
                     uploadedFile.buildPath("profile-picture"),

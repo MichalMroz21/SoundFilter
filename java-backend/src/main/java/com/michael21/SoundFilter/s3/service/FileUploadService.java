@@ -11,6 +11,7 @@ import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.GetUrlRequest;
 import software.amazon.awssdk.services.s3.model.ObjectCannedACL;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.model.S3Exception;
 
 import java.net.URI;
 
@@ -20,19 +21,59 @@ public class FileUploadService {
     private final S3Configuration s3Configuration;
 
     public FileUploadService(S3Configuration s3Configuration) {
-        this.s3Configuration = s3Configuration;
+        try {
+            if (s3Configuration == null) {
+                throw new IllegalArgumentException("S3Configuration cannot be null");
+            }
 
-        AwsCredentials credentials = AwsBasicCredentials.create(
-                s3Configuration.getAccessKey(),
-                s3Configuration.getSecretKey()
-        );
+            this.s3Configuration = s3Configuration;
 
-        S3Client s3Client = S3Client.builder()
-                .endpointOverride(URI.create(s3Configuration.getBaseUrl()))
-                .region(Region.of(s3Configuration.getRegion()))
-                .credentialsProvider(StaticCredentialsProvider.create(credentials))
-                .serviceConfiguration(software.amazon.awssdk.services.s3.S3Configuration.builder().pathStyleAccessEnabled(true).build())
-                .build();
+            System.out.println("Access Key: " + (s3Configuration.getAccessKey() != null ? "Present" : "NULL"));
+            System.out.println("Secret Key: " + (s3Configuration.getSecretKey() != null ? "Present" : "NULL"));
+            System.out.println("Base URL: " + s3Configuration.getBaseUrl());
+            System.out.println("Region: " + s3Configuration.getRegion());
+
+            if (s3Configuration.getAccessKey() == null || s3Configuration.getSecretKey() == null) {
+                throw new IllegalArgumentException("AWS credentials cannot be null");
+            }
+
+            if (s3Configuration.getBaseUrl() == null) {
+                throw new IllegalArgumentException("Base URL cannot be null");
+            }
+
+            if (s3Configuration.getRegion() == null) {
+                throw new IllegalArgumentException("Region cannot be null");
+            }
+
+            AwsCredentials credentials = AwsBasicCredentials.create(
+                    s3Configuration.getAccessKey(),
+                    s3Configuration.getSecretKey()
+            );
+
+            S3Client s3Client = S3Client.builder()
+                    .endpointOverride(URI.create(s3Configuration.getBaseUrl()))
+                    .region(Region.of(s3Configuration.getRegion()))
+                    .credentialsProvider(StaticCredentialsProvider.create(credentials))
+                    .serviceConfiguration(software.amazon.awssdk.services.s3.S3Configuration.builder()
+                            .pathStyleAccessEnabled(true)
+                            .build())
+                    .build();
+
+            try {
+                s3Client.listBuckets();
+                System.out.println("S3 client successfully initialized and connected");
+            } catch (S3Exception e) {
+                System.err.println("Error connecting to S3: " + e.getMessage());
+                throw e;
+            }
+
+            this.s3Client = s3Client;
+
+        } catch (Exception e) {
+            System.err.println("Error initializing S3 client: " + e.getMessage());
+            e.printStackTrace();
+            throw e;
+        }
     }
 
     public String uploadFile(String filePath, byte[] file){

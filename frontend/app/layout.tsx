@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import "./globals.css";
 import Navbar from "@/components/navbar";
 import { MantineProvider } from "@mantine/core";
+import { Toaster } from "@/components/ui/sonner"
 
 export const metadata: Metadata = {
   title: "SoundFilter",
@@ -39,7 +40,7 @@ export default function RootLayout({ children, }: Readonly<{ children: React.Rea
               {children}
             </MantineProvider>     
           </ThemeProvider>
-
+          <Toaster/>
         </body>
       </html>
     </>

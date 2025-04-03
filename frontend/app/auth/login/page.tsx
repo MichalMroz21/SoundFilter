@@ -12,7 +12,7 @@ export default function LoginPage() {
           <h1 className="text-3xl font-bold tracking-tight">Welcome back</h1>
 
           <p className="text-muted-foreground max-w-xs">
-            Enter your credentials below to access your SoundFilter account
+            Enter your credentials below to access Your SoundFilter account
           </p>
         </div>
 

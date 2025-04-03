@@ -41,7 +41,7 @@ export default function LoginSuccessPage() {
   return (
     <div className="flex min-h-[calc(100vh-80px)] w-full justify-center items-center">
       <div className="max-w-md w-full mx-auto p-8 rounded-xl bg-card border shadow-lg flex flex-col items-center gap-6 text-center">
-        
+
         <div className="h-24 w-24 rounded-full bg-primary/10 flex items-center justify-center">
           <IoShieldCheckmark className="text-5xl text-primary" />
         </div>
@@ -49,7 +49,7 @@ export default function LoginSuccessPage() {
         <div className="space-y-2">
           <h2 className="text-3xl font-bold tracking-tight">Login Successful!</h2>
           <p className="text-muted-foreground">
-            You will be redirected to your dashboard shortly.
+            You will be redirected to Your dashboard shortly.
           </p>
         </div>
         
