@@ -6,11 +6,20 @@ export interface UserResponse {
     email: string;
     profileImageUrl?: string;
     connectedAccounts: ConnectedAccount[];
+    audioProjects: AudioProject[];
 }
 
-interface ConnectedAccount {
+export interface ConnectedAccount {
     provider: 'google' | 'github' | 'facebook' | 'okta';
     connectedAt: string;
+}
+
+export interface AudioProject {
+    name: string
+    description?: string
+    extension: string
+    createdAt: string
+    updatedAt: string
 }
 
 export enum Role {
