@@ -1,15 +1,53 @@
 import time
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional
 import wave
 import contextlib
 import re
 import os
-import tempfile
 import whisper
 import torch
 
+# Check if CUDA is available
+CUDA_AVAILABLE = torch.cuda.is_available()
+if CUDA_AVAILABLE:
+    print(f"CUDA is available. Using GPU for Whisper.")
+    DEVICE = torch.device("cuda")
+else:
+    print(f"CUDA is not available. Using CPU for Whisper.")
+    DEVICE = torch.device("cpu")
+
+print("Loading Whisper model...")
+MODEL = whisper.load_model("base")
+
+#Move model to GPU if CUDA is available
+if CUDA_AVAILABLE:
+    MODEL = MODEL.to(DEVICE)
+    print("Model moved to GPU")
+
 
 def transcribe_audio(file_path: str, language: str = "en-US") -> Dict:
+    """
+    Transcribe an audio file and detect all words with their timestamps using Whisper.
+
+    Args:
+        file_path: Path to the audio file
+        language: Language code for speech recognition
+
+    Returns:
+        Dictionary containing transcription results:
+        {
+            "transcript": str,
+            "words": [
+                {
+                    "word": str,
+                    "start_time": float,
+                    "end_time": float
+                },
+                ...
+            ],
+            "processing_time": float
+        }
+    """
     start_time = time.time()
 
     result = {
@@ -21,33 +59,26 @@ def transcribe_audio(file_path: str, language: str = "en-US") -> Dict:
     try:
         whisper_language = language.split('-')[0]
 
-        # Load Whisper model (choose size based on your needs: tiny, base, small, medium, large)
-        model = whisper.load_model("base")
-
-        # Check if file exists
+        #Check if file exists
         if not os.path.exists(file_path):
             print(f"File not found: {file_path}")
             return result
 
-        # Print file path for debugging
+        #Print file path for debugging
         print(f"Processing file: {file_path}")
 
-        # Transcribe with word timestamps
-        # Use absolute path to ensure file is found
-        abs_file_path = os.path.abspath(file_path)
-        print(f"Absolute file path: {abs_file_path}")
-
-        transcription = model.transcribe(
-            abs_file_path,
+        #Transcribe with word timestamps using the global model
+        transcription = MODEL.transcribe(
+            file_path,
             language=whisper_language,
             word_timestamps=True,
-            fp16=False
+            fp16=CUDA_AVAILABLE  #Use FP16 only if CUDA is available
         )
 
-        # Extract transcript
+        #Extract transcript
         result["transcript"] = transcription["text"]
 
-        # Extract word timestamps
+        #Extract word timestamps
         if "segments" in transcription:
             for segment in transcription["segments"]:
                 if "words" in segment:
@@ -55,25 +86,28 @@ def transcribe_audio(file_path: str, language: str = "en-US") -> Dict:
                         result["words"].append({
                             "word": word_data["word"],
                             "start_time": word_data["start"],
-                            "end_time": word_data["end"],
-                            "confidence": word_data.get("confidence", 0.9)
+                            "end_time": word_data["end"]
                         })
 
     except Exception as e:
         print(f"Error in transcribe_audio: {e}")
         import traceback
-        traceback.print_exc()  # Print full traceback for debugging
+        traceback.print_exc()
 
     finally:
-        # Calculate processing time
+        #Calculate processing time
         result["processing_time"] = time.time() - start_time
+
+        #Clear CUDA cache if using GPU
+        if CUDA_AVAILABLE:
+            torch.cuda.empty_cache()
 
     return result
 
 
 def detect_phrase_in_audio(file_path: str, phrase: str, language: str = "en-US") -> Dict:
     """
-    Detect a phrase in an audio file and return timestamps of occurrences using locally installed Whisper.
+    Detect a phrase in an audio file and return timestamps of occurrences using Whisper.
 
     Args:
         file_path: Path to the audio file
@@ -87,8 +121,7 @@ def detect_phrase_in_audio(file_path: str, phrase: str, language: str = "en-US")
             "occurrences": [
                 {
                     "start_time": float,
-                    "end_time": float,
-                    "confidence": float
+                    "end_time": float
                 },
                 ...
             ],
@@ -118,12 +151,14 @@ def detect_phrase_in_audio(file_path: str, phrase: str, language: str = "en-US")
         if transcript and phrase.lower() in transcript.lower():
             result["found"] = True
 
-            # Find phrase occurrences in aligned words
-            occurrences = find_phrase_occurrences(words_with_times, phrase)
+            # Find phrase occurrences
+            occurrences = find_phrase_occurrences(transcript, phrase, words_with_times)
             result["occurrences"] = occurrences
 
     except Exception as e:
         print(f"Error in detect_phrase_in_audio: {e}")
+        import traceback
+        traceback.print_exc()
 
     finally:
         # Calculate processing time
@@ -132,53 +167,71 @@ def detect_phrase_in_audio(file_path: str, phrase: str, language: str = "en-US")
     return result
 
 
-def find_phrase_occurrences(words_with_times: List[Dict], phrase: str) -> List[Dict]:
+def find_phrase_occurrences(transcript: str, phrase: str, words_with_times: List[Dict]) -> List[Dict]:
     """
-    Find occurrences of a phrase in aligned words.
+    Find occurrences of a phrase in the transcript and map to word timestamps.
 
     Args:
-        words_with_times: List of words with timestamps
+        transcript: Full transcript text
         phrase: Phrase to find
+        words_with_times: List of words with timestamps
 
     Returns:
         List of phrase occurrences with timestamps
     """
     occurrences = []
 
-    if not words_with_times:
+    if not transcript or not phrase or not words_with_times:
         return occurrences
 
-    # Convert phrase to lowercase and split into words
-    phrase_words = phrase.lower().split()
+    # Convert to lowercase for case-insensitive matching
+    transcript_lower = transcript.lower()
+    phrase_lower = phrase.lower()
 
-    # Find occurrences of the phrase
-    i = 0
-    while i <= len(words_with_times) - len(phrase_words):
-        match = True
-        for j in range(len(phrase_words)):
-            if i + j >= len(words_with_times) or words_with_times[i + j]["word"].lower().strip() != phrase_words[j]:
-                match = False
+    # Create a list of all words with their positions in the transcript
+    all_words = []
+    for i, word_data in enumerate(words_with_times):
+        word = word_data["word"].lower()
+        # Find all occurrences of this word in the transcript
+        start_pos = 0
+        while True:
+            pos = transcript_lower.find(word, start_pos)
+            if pos == -1:
                 break
+            all_words.append({
+                "word": word,
+                "pos": pos,
+                "end_pos": pos + len(word),
+                "index": i,
+                "start_time": word_data["start_time"],
+                "end_time": word_data["end_time"]
+            })
+            start_pos = pos + 1
 
-        if match:
-            # Found a match, create an occurrence
-            start_time = words_with_times[i]["start_time"]
-            end_time = words_with_times[i + len(phrase_words) - 1]["end_time"]
+    # Sort words by their position in the transcript
+    all_words.sort(key=lambda x: x["pos"])
 
-            # Calculate average confidence
-            confidence_sum = sum(words_with_times[i + j].get("confidence", 0.9) for j in range(len(phrase_words)))
-            avg_confidence = confidence_sum / len(phrase_words)
+    # Find all occurrences of the phrase in the transcript
+    start_pos = 0
+    while True:
+        pos = transcript_lower.find(phrase_lower, start_pos)
+        if pos == -1:
+            break
+
+        # Find the words that overlap with this phrase occurrence
+        phrase_end_pos = pos + len(phrase_lower)
+        overlapping_words = [w for w in all_words if w["end_pos"] > pos and w["pos"] < phrase_end_pos]
+
+        if overlapping_words:
+            start_time = min(w["start_time"] for w in overlapping_words)
+            end_time = max(w["end_time"] for w in overlapping_words)
 
             occurrences.append({
                 "start_time": start_time,
-                "end_time": end_time,
-                "confidence": avg_confidence
+                "end_time": end_time
             })
 
-            # Skip to after this occurrence
-            i += len(phrase_words)
-        else:
-            i += 1
+        start_pos = pos + 1
 
     return occurrences
 

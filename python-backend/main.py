@@ -1,10 +1,11 @@
-from fastapi import FastAPI, UploadFile, File, Form, HTTPException
-from typing import Optional
+from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Response, status
+from typing import Optional, List, Dict
 import uvicorn
 import os
 import pathlib
 
 from audio.speech_processor import detect_phrase_in_audio, transcribe_audio
+from audio.audio_modifier import modify_audio
 
 app = FastAPI(
     title="SoundFilter Audio API",
@@ -12,15 +13,15 @@ app = FastAPI(
     version="0.1.0"
 )
 
-# Create temp directory with absolute path
+#Create temp directory
 BASE_DIR = pathlib.Path(__file__).parent.absolute()
 TEMP_DIR = os.path.join(BASE_DIR, "temp")
 os.makedirs(TEMP_DIR, exist_ok=True)
 
-
 # DO ALL ENTRYPOINTS AS "audio-api" ... slash something...
 @app.get("/audio-api/{name}")
 async def say_hello(name: str):
+    print(f"Received request for /audio-api/{name}")
     return {"message": f"Hello {name}"}
 
 
@@ -33,23 +34,18 @@ async def detect_phrase(
     """
     Detect a text phrase in an audio file and return timestamps where it occurs.
     """
-    # Validate file type
     if not audio_file.content_type.startswith("audio/"):
-        raise HTTPException(status_code=400, detail="File must be an audio file")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="File must be an audio file")
 
-    # Save uploaded file temporarily with absolute path
     temp_file_path = os.path.join(TEMP_DIR, audio_file.filename)
 
     try:
-        # Ensure temp directory exists
         os.makedirs(TEMP_DIR, exist_ok=True)
 
-        # Save the file
         with open(temp_file_path, "wb") as buffer:
             content = await audio_file.read()
             buffer.write(content)
 
-        # Call the detection function
         result = detect_phrase_in_audio(temp_file_path, phrase, language)
 
         return {
@@ -61,10 +57,10 @@ async def detect_phrase(
         }
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error processing audio: {str(e)}")
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Error processing audio: {str(e)}")
 
     finally:
-        # Clean up the temporary file
+        #Clean up the temporary file
         if os.path.exists(temp_file_path):
             try:
                 os.remove(temp_file_path)
@@ -74,29 +70,24 @@ async def detect_phrase(
 
 @app.post("/audio-api/transcribe")
 async def transcribe(
-        audio_file: UploadFile = File(..., description="Audio file to transcribe"),
+        audio_file: UploadFile = File(..., description="Audio file to analyze"),
         language: str = Form("en-US", description="Language code (e.g., en-US, pl-PL)")
 ):
     """
     Transcribe an audio file and detect all words with their timestamps.
     """
-    # Validate file type
     if not audio_file.content_type.startswith("audio/"):
-        raise HTTPException(status_code=400, detail="File must be an audio file")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="File must be an audio file")
 
-    # Save uploaded file temporarily with absolute path
     temp_file_path = os.path.join(TEMP_DIR, audio_file.filename)
 
     try:
-        # Ensure temp directory exists
         os.makedirs(TEMP_DIR, exist_ok=True)
 
-        # Save the file
         with open(temp_file_path, "wb") as buffer:
             content = await audio_file.read()
             buffer.write(content)
 
-        # Call the transcription function
         result = transcribe_audio(temp_file_path, language)
 
         return {
@@ -107,10 +98,69 @@ async def transcribe(
         }
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error processing audio: {str(e)}")
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Error processing audio: {str(e)}")
 
     finally:
-        # Clean up the temporary file
+        #Clean up the temporary file
+        if os.path.exists(temp_file_path):
+            try:
+                os.remove(temp_file_path)
+            except Exception as e:
+                print(f"Warning: Could not remove temporary file {temp_file_path}: {e}")
+
+
+@app.post("/audio-api/modify")
+async def modify_audio_endpoint(
+        audio_file: UploadFile = File(..., description="Audio file to modify"),
+        start_time: float = Form(..., description="Start time in seconds"),
+        end_time: float = Form(..., description="End time in seconds"),
+        modification_type: str = Form(..., description="Type of modification: 'mute' or 'tone'"),
+        tone_frequency: Optional[int] = Form(440, description="Frequency of tone in Hz (only for 'tone' type)"),
+        output_format: str = Form("wav", description="Output format (wav, mp3, etc.)")
+):
+    """
+    Modify an audio file by applying a modification at the specified time range.
+    """
+    if not audio_file.content_type.startswith("audio/"):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="File must be an audio file")
+
+    if modification_type not in ["mute", "tone"]:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Modification type must be 'mute' or 'tone'")
+
+    if start_time >= end_time:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Start time must be less than end time")
+
+    #Save uploaded file temporarily
+    temp_file_path = os.path.join(TEMP_DIR, audio_file.filename)
+
+    try:
+        os.makedirs(TEMP_DIR, exist_ok=True)
+
+        with open(temp_file_path, "wb") as buffer:
+            content = await audio_file.read()
+            buffer.write(content)
+
+        file_bytes, content_type = modify_audio(
+            temp_file_path,
+            start_time,
+            end_time,
+            modification_type,
+            tone_frequency,
+            output_format
+        )
+
+        return Response(
+            content=file_bytes,
+            media_type=content_type,
+            headers={
+                "Content-Disposition": f'attachment; filename="modified_{audio_file.filename}"'
+            }
+        )
+
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Error modifying audio: {str(e)}")
+
+    finally:
         if os.path.exists(temp_file_path):
             try:
                 os.remove(temp_file_path)
@@ -123,8 +173,7 @@ async def health_check():
     """Health check endpoint"""
     return {"status": "healthy"}
 
-
 if __name__ == "__main__":
     print(f"Temporary directory created at: {TEMP_DIR}")
-    uvicorn.run("main:app", host="0.0.0.0", port=8082, reload=True)
+    uvicorn.run("main:app", host="0.0.0.0", port=8082)
 
