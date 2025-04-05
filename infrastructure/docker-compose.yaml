@@ -4,14 +4,14 @@ services:
     restart: always
     container_name: database
     environment:
-      MYSQL_DATABASE: 'starter-kit-db'
+      MYSQL_DATABASE: 'sound-filter-db'
       MYSQL_USER: 'user'
       MYSQL_PASSWORD: 'password'
       MYSQL_ROOT_PASSWORD: 'password'
     ports:
       - "3306:3306"
     volumes:
-      - starter_kit_db:/var/lib/mysql
+      - sound-filter-db:/var/lib/mysql
     networks:
       - app_net
   mailpit:
@@ -40,4 +40,4 @@ networks:
   app_net:
     driver: bridge
 volumes:
-  starter_kit_db:
+  sound-filter-db:

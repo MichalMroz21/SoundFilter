@@ -46,6 +46,9 @@ public class User extends AbstractEntity implements UserDetails {
     @OneToMany(mappedBy = "user", fetch = FetchType.EAGER)
     private List<UserConnectedAccount> connectedAccounts = new ArrayList<>();
 
+    @OneToMany(mappedBy = "user", fetch = FetchType.EAGER)
+    private List<AudioProject> audioProjects = new ArrayList<>();
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return Collections.singleton(new SimpleGrantedAuthority("ROLE_" + role.name()));
@@ -86,23 +89,29 @@ public class User extends AbstractEntity implements UserDetails {
     }
 
     public User (OAuth2User oAuth2User) {
-        User user = new User();
-        user.email = oAuth2User.getAttribute("email");
+        this.email = oAuth2User.getAttribute("email");
         String name = oAuth2User.getAttribute("name");
+
         if (name != null) {
             List<String> names = List.of(name.split(" "));
+
             if (names.size() > 1) {
-                user.firstName = names.get(0);
-                user.lastName = names.get(1);
+                this.firstName = names.get(0);
+                this.lastName = names.get(1);
             } else {
-                user.firstName = names.getFirst();
+                this.firstName = names.getFirst();
             }
         }
-        user.verified = true;
-        user.role = Role.USER;
+
+        this.verified = true;
+        this.role = Role.USER;
     }
 
     public void addConnectedAccount(UserConnectedAccount connectedAccount) {
         connectedAccounts.add(connectedAccount);
+    }
+
+    public void addAudioProject(AudioProject audioProject) {
+        audioProjects.add(audioProject);
     }
 }

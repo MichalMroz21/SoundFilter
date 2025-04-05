@@ -1,5 +1,6 @@
 package com.michael21.SoundFilter.users.data;
 
+import com.michael21.SoundFilter.users.AudioProject;
 import com.michael21.SoundFilter.users.Role;
 import com.michael21.SoundFilter.users.User;
 import lombok.Data;
@@ -17,6 +18,7 @@ public class UserResponse {
     private String email;
     private String profileImageUrl;
     private List<ConnectedAccountResponse> connectedAccounts = new ArrayList<>();
+    private List<AudioProjectResponse> audioProjects = new ArrayList<>();
 
     public UserResponse(User user) {
         this.id = user.getId();
@@ -29,7 +31,13 @@ public class UserResponse {
         user.getConnectedAccounts().forEach((provider) -> {
             this.connectedAccounts.add(new ConnectedAccountResponse(provider.getProvider(), provider.getConnectedAt()));
         });
+
+        user.getAudioProjects().forEach((project) -> {
+            this.audioProjects.add(new AudioProjectResponse(project.getId(), project.getName(), project.getDescription(),
+                    project.getAudioFormat(), project.getCreatedAt(), project.getUpdatedAt()));
+        });
     }
 
     public record ConnectedAccountResponse(String provider, LocalDateTime connectedAt) {}
+    public record AudioProjectResponse(long id, String name, String description, String extension, LocalDateTime createdAt, LocalDateTime updatedAt) {}
 }

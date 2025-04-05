@@ -15,6 +15,7 @@ export interface ConnectedAccount {
 }
 
 export interface AudioProject {
+    id: number
     name: string
     description?: string
     extension: string

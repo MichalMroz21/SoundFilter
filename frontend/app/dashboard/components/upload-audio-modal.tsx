@@ -24,10 +24,11 @@ import httpClient from "@/lib/httpClient"
 interface UploadAudioModalProps {
   isOpen: boolean
   onClose: () => void
+  onProjectCreated?: () => Promise<any>
 }
 
-export function UploadAudioModal({ isOpen, onClose }: UploadAudioModalProps) {
-  const { user, mutate } = useAuthGuard({ middleware: "auth" })
+export function UploadAudioModal({ isOpen, onClose, onProjectCreated }: UploadAudioModalProps) {
+  const { mutate } = useAuthGuard({ middleware: "auth" })
   const [isUploading, setIsUploading] = useState(false)
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [projectName, setProjectName] = useState("")
@@ -41,7 +42,8 @@ export function UploadAudioModal({ isOpen, onClose }: UploadAudioModalProps) {
     if (e.target.files && e.target.files.length > 0) {
       const file = e.target.files[0]
 
-      const maxSize = 50 * 1024 * 1024
+      // Check file size (max 50MB)
+      const maxSize = 50 * 1024 * 1024 // 50MB
       if (file.size > maxSize) {
         toast.error("File size exceeds 50MB limit")
         if (fileInputRef.current) fileInputRef.current.value = ""
@@ -50,6 +52,7 @@ export function UploadAudioModal({ isOpen, onClose }: UploadAudioModalProps) {
 
       setSelectedFile(file)
 
+      // Auto-fill project name from file name if not already set
       if (!projectName) {
         const fileName = file.name
         const nameWithoutExtension = fileName.split(".").slice(0, -1).join(".")
@@ -61,12 +64,13 @@ export function UploadAudioModal({ isOpen, onClose }: UploadAudioModalProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
+    // Disable the submit button immediately to prevent multiple clicks
     if (submitButtonRef.current) {
       submitButtonRef.current.disabled = true
     }
 
     if (isUploading) {
-      return 
+      return // Prevent multiple submissions
     }
 
     if (!selectedFile) {
@@ -95,43 +99,58 @@ export function UploadAudioModal({ isOpen, onClose }: UploadAudioModalProps) {
       console.log("Project name:", projectName)
       console.log("Description:", description || "(empty)")
 
+      // Create a FormData object
       const formData = new FormData()
-
       formData.append("file", selectedFile)
       formData.append("name", projectName)
       formData.append("description", description || "")
 
+      // Create an abort controller for cancellation
       abortControllerRef.current = new AbortController()
 
+      // Make the request using httpClient
       const response = await httpClient.post("/api/users/create-audio-project", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
         signal: abortControllerRef.current.signal,
-        timeout: 300000, 
+        timeout: 300000, // 5 minutes
         onUploadProgress: (progressEvent) => {
           if (progressEvent.total !== undefined) {
             const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total)
             setUploadProgress(percentCompleted)
             console.log(`Upload progress: ${percentCompleted}%`)
           } else {
+            // If total is undefined, we can't calculate percentage
+            // Just show the amount of data uploaded
             console.log(`Uploaded ${(progressEvent.loaded / (1024 * 1024)).toFixed(2)} MB`)
-            setUploadProgress(-1) 
+            // We could set an indeterminate progress here
+            setUploadProgress(-1) // Use a special value to indicate indeterminate progress
           }
         },
       })
 
       console.log("Upload complete!", response.data)
       toast.success("Audio project created successfully")
-      mutate() 
+
+      // Force a direct refresh of user data
+      if (onProjectCreated) {
+        await onProjectCreated()
+      } else {
+        // Force a complete revalidation
+        await mutate(undefined, { revalidate: true })
+      }
+
       resetForm()
       onClose()
     } catch (error: any) {
       console.error("Error uploading audio:", error)
 
+      // Check if it's an abort error (user cancelled)
       if (error.name === "AbortError" || error.code === "ECONNABORTED") {
         toast.info("Upload was cancelled")
       } else {
+        // Extract error message from response if available
         const errorMessage =
           error.response?.data?.message ||
           error.response?.data?.error ||
@@ -167,6 +186,7 @@ export function UploadAudioModal({ isOpen, onClose }: UploadAudioModalProps) {
 
   const handleClose = () => {
     if (isUploading) {
+      // Ask for confirmation before cancelling an in-progress upload
       if (window.confirm("Upload in progress. Are you sure you want to cancel?")) {
         cancelUpload()
         resetForm()

@@ -4,8 +4,8 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 @Data
-public class CreateAudioProjectRequest {
-    @NotBlank(message = "Project name is required")
+public class UpdateProjectDetailsRequest {
+    @NotBlank(message = "Project name cannot be empty")
     private String name;
 
     private String description;
