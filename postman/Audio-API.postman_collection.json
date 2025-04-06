@@ -13,6 +13,181 @@
 				"header": []
 			},
 			"response": []
+		},
+		{
+			"name": "detectPhraseWithText",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "audio_file",
+							"type": "file",
+							"src": "/D:/test-audio-files/harvard.wav"
+						},
+						{
+							"key": "phrase",
+							"value": "food",
+							"type": "text"
+						},
+						{
+							"key": "language",
+							"value": "en-US",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://localhost:8080/audio-api/detect-phrase",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"audio-api",
+						"detect-phrase"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "transcribe",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "audio_file",
+							"type": "file",
+							"src": "/D:/test-audio-files/harvard.wav"
+						},
+						{
+							"key": "language",
+							"value": "en-US",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://localhost:8080/audio-api/transcribe",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"audio-api",
+						"transcribe"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "modify-mute",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "audio_file",
+							"type": "file",
+							"src": "/D:/test-audio-files/harvard.wav"
+						},
+						{
+							"key": "start_time",
+							"value": "1.5",
+							"type": "text"
+						},
+						{
+							"key": "end_time",
+							"value": "3.2",
+							"type": "text"
+						},
+						{
+							"key": "modification_type",
+							"value": "mute",
+							"type": "text"
+						},
+						{
+							"key": "output_format",
+							"value": "wav",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://localhost:8083/audio-api/modify",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8083",
+					"path": [
+						"audio-api",
+						"modify"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "modify-tone",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "audio_file",
+							"type": "file",
+							"src": "/D:/test-audio-files/harvard.wav"
+						},
+						{
+							"key": "start_time",
+							"value": "1.5",
+							"type": "text"
+						},
+						{
+							"key": "end_time",
+							"value": "3.2",
+							"type": "text"
+						},
+						{
+							"key": "modification_type",
+							"value": "mute",
+							"type": "text"
+						},
+						{
+							"key": "output_format",
+							"value": "wav",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://localhost:8083/audio-api/modify",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8083",
+					"path": [
+						"audio-api",
+						"modify"
+					]
+				}
+			},
+			"response": []
 		}
 	]
 }
