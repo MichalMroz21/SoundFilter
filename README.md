@@ -7,7 +7,7 @@ This will run database, email server and caddy reverse proxy.
 
 - import postman file(s) into postman to test requests
 
-- install node.js, in vscode in frontend run
+- install node.js, in vscode, in frontend run
 ```
 npm run dev
 ```
