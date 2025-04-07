@@ -62,7 +62,8 @@ export function ProjectActionsDialog({
   }, [project])
 
   const handleEditProject = () => {
-    router.push(`/dashboard/projects/${projectIndex}`)
+    // Use the actual project ID instead of the index
+    router.push(`/dashboard/projects/${project.id}`)
     onClose()
   }
 
@@ -94,17 +95,17 @@ export function ProjectActionsDialog({
         }
       }
 
-      // Force a direct refresh of user data
+      // Force a complete revalidation of user data
+      await mutate(undefined, { revalidate: true })
+
+      // If a callback is provided, call it after revalidation
       if (onProjectChange) {
         await onProjectChange()
-      } else {
-        // Force a complete revalidation
-        await mutate(undefined, { revalidate: true })
+      }
 
-        // If no callback provided, refresh the page
-        if (typeof window !== "undefined") {
-          window.location.reload()
-        }
+      // Force a hard refresh of the page
+      if (typeof window !== "undefined") {
+        window.location.href = "/dashboard"
       }
     } catch (error) {
       console.error("Error deleting project:", error)

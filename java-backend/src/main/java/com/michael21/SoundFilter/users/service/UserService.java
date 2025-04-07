@@ -1,9 +1,10 @@
 package com.michael21.SoundFilter.users.service;
 
+import com.michael21.SoundFilter.audio.service.AudioService;
 import com.michael21.SoundFilter.auth.SecurityUtil;
 import com.michael21.SoundFilter.s3.UploadedFile;
 import com.michael21.SoundFilter.s3.repository.UploadedFileRepository;
-import com.michael21.SoundFilter.s3.service.FileUploadService;
+import com.michael21.SoundFilter.s3.service.FileService;
 import com.michael21.SoundFilter.users.AudioProject;
 import com.michael21.SoundFilter.users.PasswordResetToken;
 import com.michael21.SoundFilter.users.User;
@@ -16,14 +17,11 @@ import com.michael21.SoundFilter.users.repository.PasswordResetTokenRepository;
 import com.michael21.SoundFilter.users.repository.UserRepository;
 import com.michael21.SoundFilter.users.repository.VerificationCodeRepository;
 import com.michael21.SoundFilter.util.exception.ApiException;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jobrunr.scheduling.BackgroundJobRequest;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,6 +29,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserService {
@@ -39,8 +38,9 @@ public class UserService {
     private final PasswordResetTokenRepository passwordResetTokenRepository;
     private final UploadedFileRepository uploadedFileRepository;
     private final PasswordEncoder passwordEncoder;
-    private final FileUploadService fileUploadService;
+    private final FileService fileService;
     private final AudioProjectRepository audioProjectRepository;
+    private final AudioService audioService;
 
     @Transactional
     public UserResponse create(@Valid CreateUserRequest request) {
@@ -124,7 +124,7 @@ public class UserService {
         UploadedFile uploadedFile = new UploadedFile(file.getOriginalFilename(), file.getSize(), user);
 
         try {
-            String url = fileUploadService.uploadFile(
+            String url = fileService.uploadFile(
                     uploadedFile.buildPath("profile-picture"),
                     file.getBytes()
             );
@@ -142,12 +142,13 @@ public class UserService {
     @Transactional
     public UserResponse addAudioProject(String name, String description, MultipartFile file) {
         User user = SecurityUtil.getAuthenticatedUser();
+
         UploadedFile uploadedFile = new UploadedFile(file.getOriginalFilename(), file.getSize(), user);
 
         String url = "";
 
         try {
-            url = fileUploadService.uploadFile(
+            url = fileService.uploadFile(
                     uploadedFile.buildPath("audio-file"),
                     file.getBytes()
             );
@@ -159,10 +160,11 @@ public class UserService {
         AudioProject createdProject = new AudioProject(name, description, user, file, url,
                 uploadedFile.getCreatedAt(), uploadedFile.getExtension());
 
-        user.addAudioProject(createdProject);
+        AudioProject savedProject = audioProjectRepository.save(createdProject);
+
+        user.addAudioProject(savedProject);
 
         userRepository.save(user);
-        audioProjectRepository.save(createdProject);
 
         return new UserResponse(user);
     }
@@ -170,25 +172,26 @@ public class UserService {
     @Transactional
     public UserResponse updateProjectDetails(Long projectId, UpdateProjectDetailsRequest request) {
         User user = SecurityUtil.getAuthenticatedUser();
+        AudioProject audioProject = audioService.getAudioProject(user, projectId);
 
-        AudioProject audioProject = audioProjectRepository.findById(projectId)
-                .orElseThrow(() -> ApiException.builder().status(HttpServletResponse.SC_NOT_FOUND).
-                message("Project not found").build());
-
-        if (!(audioProject.getUser().getId() == user.getId())) {
-            throw ApiException.builder().status(HttpServletResponse.SC_FORBIDDEN).
-                    message("This user doesn't have access to this project").build();
-        }
+        user.getAudioProjects().stream()
+                .filter(project -> project.getId() == projectId)
+                .findFirst()
+                .ifPresent(project -> {
+                    project.setName(request.getName());
+                    project.setDescription(request.getDescription());
+                });
 
         audioProject.setName(request.getName());
         audioProject.setDescription(request.getDescription());
+
+        userRepository.save(user);
 
         audioProjectRepository.save(audioProject);
 
         return new UserResponse(user);
     }
 
-    //TODO: add removing from bucket also
     @Transactional
     public UserResponse deleteProject(Long projectId) {
         User user = SecurityUtil.getAuthenticatedUser();
@@ -196,6 +199,22 @@ public class UserService {
         AudioProject audioProject = audioProjectRepository.findById(projectId)
                 .orElseThrow(() -> ApiException.builder().status(HttpServletResponse.SC_NOT_FOUND).
                         message("Project not found").build());
+
+        if (!(audioProject.getUser().getId() == user.getId())) {
+            throw ApiException.builder().status(HttpServletResponse.SC_FORBIDDEN).
+                    message("This user doesn't have access to this project").build();
+        }
+
+        try {
+            String filePath = audioProject.getAudioUrl().substring(audioProject.getAudioUrl().lastIndexOf("/") + 1);
+            fileService.deleteFile(filePath);
+        } catch (Exception e) {
+            log.error("Failed to delete file from S3: {}", e.getMessage());
+        }
+
+        user.getAudioProjects().removeIf(project -> project.getId() == (projectId));
+
+        userRepository.save(user);
 
         audioProjectRepository.delete(audioProject);
 

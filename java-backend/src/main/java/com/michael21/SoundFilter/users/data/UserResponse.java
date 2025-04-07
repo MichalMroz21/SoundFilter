@@ -34,10 +34,10 @@ public class UserResponse {
 
         user.getAudioProjects().forEach((project) -> {
             this.audioProjects.add(new AudioProjectResponse(project.getId(), project.getName(), project.getDescription(),
-                    project.getAudioFormat(), project.getCreatedAt(), project.getUpdatedAt()));
+                    project.getAudioFormat(), project.getCreatedAt(), project.getUpdatedAt(), project.getAudioUrl()));
         });
     }
 
     public record ConnectedAccountResponse(String provider, LocalDateTime connectedAt) {}
-    public record AudioProjectResponse(long id, String name, String description, String extension, LocalDateTime createdAt, LocalDateTime updatedAt) {}
+    public record AudioProjectResponse(long id, String name, String description, String extension, LocalDateTime createdAt, LocalDateTime updatedAt, String audioUrl) {}
 }

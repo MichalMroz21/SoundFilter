@@ -6,6 +6,7 @@ import re
 import os
 import whisper
 import torch
+import numpy as np
 
 # Check if CUDA is available
 CUDA_AVAILABLE = torch.cuda.is_available()
@@ -16,22 +17,22 @@ else:
     print(f"CUDA is not available. Using CPU for Whisper.")
     DEVICE = torch.device("cpu")
 
+# Load Whisper model globally
 print("Loading Whisper model...")
 MODEL = whisper.load_model("base")
 
-#Move model to GPU if CUDA is available
+# Move model to GPU if CUDA is available
 if CUDA_AVAILABLE:
     MODEL = MODEL.to(DEVICE)
     print("Model moved to GPU")
 
 
-def transcribe_audio(file_path: str, language: str = "en-US") -> Dict:
+def transcribe_audio(file_path: str) -> Dict:
     """
     Transcribe an audio file and detect all words with their timestamps using Whisper.
 
     Args:
         file_path: Path to the audio file
-        language: Language code for speech recognition
 
     Returns:
         Dictionary containing transcription results:
@@ -45,40 +46,45 @@ def transcribe_audio(file_path: str, language: str = "en-US") -> Dict:
                 },
                 ...
             ],
-            "processing_time": float
+            "processing_time": float,
+            "detected_language": str
         }
     """
     start_time = time.time()
 
+    # Initialize result structure
     result = {
         "transcript": "",
         "words": [],
-        "processing_time": 0
+        "processing_time": 0,
+        "detected_language": ""
     }
 
     try:
-        whisper_language = language.split('-')[0]
-
-        #Check if file exists
+        # Check if file exists
         if not os.path.exists(file_path):
             print(f"File not found: {file_path}")
             return result
 
-        #Print file path for debugging
+        # Print file path for debugging
         print(f"Processing file: {file_path}")
 
-        #Transcribe with word timestamps using the global model
+        # Transcribe with word timestamps using the global model
+        # Let Whisper detect the language automatically
         transcription = MODEL.transcribe(
             file_path,
-            language=whisper_language,
             word_timestamps=True,
-            fp16=CUDA_AVAILABLE  #Use FP16 only if CUDA is available
+            fp16=CUDA_AVAILABLE  # Use FP16 only if CUDA is available
         )
 
-        #Extract transcript
+        # Extract transcript
         result["transcript"] = transcription["text"]
 
-        #Extract word timestamps
+        # Extract detected language
+        if "language" in transcription:
+            result["detected_language"] = transcription["language"]
+
+        # Extract word timestamps
         if "segments" in transcription:
             for segment in transcription["segments"]:
                 if "words" in segment:
@@ -95,24 +101,23 @@ def transcribe_audio(file_path: str, language: str = "en-US") -> Dict:
         traceback.print_exc()
 
     finally:
-        #Calculate processing time
+        # Calculate processing time
         result["processing_time"] = time.time() - start_time
 
-        #Clear CUDA cache if using GPU
+        # Clear CUDA cache if using GPU
         if CUDA_AVAILABLE:
             torch.cuda.empty_cache()
 
     return result
 
 
-def detect_phrase_in_audio(file_path: str, phrase: str, language: str = "en-US") -> Dict:
+def detect_phrase_in_audio(file_path: str, phrase: str) -> Dict:
     """
     Detect a phrase in an audio file and return timestamps of occurrences using Whisper.
 
     Args:
         file_path: Path to the audio file
         phrase: Text phrase to detect
-        language: Language code for speech recognition
 
     Returns:
         Dictionary containing detection results:
@@ -125,7 +130,8 @@ def detect_phrase_in_audio(file_path: str, phrase: str, language: str = "en-US")
                 },
                 ...
             ],
-            "processing_time": float
+            "processing_time": float,
+            "detected_language": str
         }
     """
     start_time = time.time()
@@ -134,18 +140,21 @@ def detect_phrase_in_audio(file_path: str, phrase: str, language: str = "en-US")
     result = {
         "found": False,
         "occurrences": [],
-        "processing_time": 0
+        "processing_time": 0,
+        "detected_language": ""
     }
 
     try:
         # Get transcript with word timestamps using Whisper
-        transcription_result = transcribe_audio(file_path, language)
+        transcription_result = transcribe_audio(file_path)
         transcript = transcription_result["transcript"]
         words_with_times = transcription_result["words"]
+        result["detected_language"] = transcription_result["detected_language"]
 
         # Print for debugging
         print(f"Transcript: {transcript}")
         print(f"Searching for phrase: {phrase}")
+        print(f"Detected language: {result['detected_language']}")
 
         # Check if phrase is in transcript (case-insensitive)
         if transcript and phrase.lower() in transcript.lower():
@@ -223,6 +232,7 @@ def find_phrase_occurrences(transcript: str, phrase: str, words_with_times: List
         overlapping_words = [w for w in all_words if w["end_pos"] > pos and w["pos"] < phrase_end_pos]
 
         if overlapping_words:
+            # Get the start time of the first overlapping word and end time of the last
             start_time = min(w["start_time"] for w in overlapping_words)
             end_time = max(w["end_time"] for w in overlapping_words)
 

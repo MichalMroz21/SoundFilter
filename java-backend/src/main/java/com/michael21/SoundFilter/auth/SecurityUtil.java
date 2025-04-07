@@ -1,11 +1,14 @@
 package com.michael21.SoundFilter.auth;
 
 import com.michael21.SoundFilter.users.User;
+import com.michael21.SoundFilter.users.repository.UserRepository;
 import com.michael21.SoundFilter.util.exception.ApiException;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.security.web.context.SecurityContextRepository;
 

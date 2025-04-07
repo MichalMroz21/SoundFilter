@@ -3,24 +3,21 @@ package com.michael21.SoundFilter.s3.service;
 import com.michael21.SoundFilter.s3.config.S3Configuration;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.auth.credentials.*;
-import software.amazon.awssdk.core.client.config.ClientOverrideConfiguration;
-import software.amazon.awssdk.core.client.config.SdkAdvancedClientOption;
+import software.amazon.awssdk.core.ResponseInputStream;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.model.GetUrlRequest;
-import software.amazon.awssdk.services.s3.model.ObjectCannedACL;
-import software.amazon.awssdk.services.s3.model.PutObjectRequest;
-import software.amazon.awssdk.services.s3.model.S3Exception;
+import software.amazon.awssdk.services.s3.model.*;
 
+import java.io.IOException;
 import java.net.URI;
 
 @Service
-public class FileUploadService {
+public class FileService {
     private S3Client s3Client;
     private final S3Configuration s3Configuration;
 
-    public FileUploadService(S3Configuration s3Configuration) {
+    public FileService(S3Configuration s3Configuration) {
         try {
             if (s3Configuration == null) {
                 throw new IllegalArgumentException("S3Configuration cannot be null");
@@ -91,6 +88,19 @@ public class FileUploadService {
             return s3Client.utilities().getUrl(getUrlRequest).toURI().toString();
         } catch (Exception e) {
             throw new RuntimeException("Failed to get URL of uploaded File", e);
+        }
+    }
+
+    public void deleteFile(String filePath) {
+        DeleteObjectRequest request = DeleteObjectRequest.builder()
+                .bucket(s3Configuration.getBucketName())
+                .key(filePath)
+                .build();
+
+        try {
+            s3Client.deleteObject(request);
+        } catch (S3Exception e) {
+            throw new RuntimeException("Failed to delete file from S3", e);
         }
     }
 }

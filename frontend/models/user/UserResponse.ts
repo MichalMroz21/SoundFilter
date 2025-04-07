@@ -21,6 +21,7 @@ export interface AudioProject {
     extension: string
     createdAt: string
     updatedAt: string
+    audioUrl: string
 }
 
 export enum Role {

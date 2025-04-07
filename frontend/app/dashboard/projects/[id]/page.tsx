@@ -1,28 +1,49 @@
 "use client"
 
-import { useAuthGuard } from "@/lib/auth/use-auth"
+import { useEffect, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
-import Container from "@/components/container"
-import { Button } from "@/components/ui/button"
+import { useAuthGuard } from "@/lib/auth/use-auth"
 import { ArrowLeft } from "lucide-react"
+import { Button } from "@/components/ui/button"
 import Loading from "@/components/loading"
-import { useState, useEffect } from "react"
+import AudioEditor from "./components/audio-editor"
+import type { AudioProject } from "@/models/user/UserResponse"
+import type { TranscriptionResult } from "@/models/audio/TranscriptionResult"
+import httpClient from "@/lib/httpClient"
+import { toast } from "sonner"
 
 export default function ProjectEditPage() {
   const { user } = useAuthGuard({ middleware: "auth" })
   const params = useParams()
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(true)
-  const [project, setProject] = useState<any>(null)
+  const [project, setProject] = useState<AudioProject | null>(null)
+  const [transcription, setTranscription] = useState<TranscriptionResult | null>(null)
+  const [isTranscribing, setIsTranscribing] = useState(false)
 
   useEffect(() => {
     if (user) {
-      const projectIndex = Number.parseInt(params.id as string)
-      const foundProject = user.audioProjects?.[projectIndex]
-      setProject(foundProject)
+      const projectId = params.id as string
+      const foundProject = user.audioProjects?.find((p) => p.id.toString() === projectId)
+      setProject(foundProject || null)
       setIsLoading(false)
     }
   }, [user, params.id])
+
+  const handleTranscribe = async () => {
+    if (!project) return
+
+    setIsTranscribing(true)
+    try {
+      const response = await httpClient.post<TranscriptionResult>(`/api/audio/${project.id}/transcribe`)
+      setTranscription(response.data)
+    } catch (error) {
+      console.error("Error transcribing audio:", error)
+      toast.error("Failed to transcribe audio")
+    } finally {
+      setIsTranscribing(false)
+    }
+  }
 
   if (isLoading || !user) {
     return <Loading />
@@ -30,39 +51,39 @@ export default function ProjectEditPage() {
 
   if (!project) {
     return (
-      <Container size="lg" className="py-8">
-        <div className="flex flex-col items-center justify-center py-12 text-center">
-          <h1 className="text-2xl font-bold mb-4">Project Not Found</h1>
-          <p className="text-muted-foreground mb-6">
+      <div className="flex flex-col items-center justify-center min-h-screen p-8">
+        <div className="text-center space-y-4 max-w-md">
+          <h1 className="text-2xl font-bold">Project Not Found</h1>
+          <p className="text-muted-foreground">
             The project you're looking for doesn't exist or you don't have access to it.
           </p>
           <Button onClick={() => router.push("/dashboard")}>Back to Dashboard</Button>
         </div>
-      </Container>
+      </div>
     )
   }
 
   return (
-    <Container size="lg" className="py-8">
-      <div className="flex flex-col gap-6">
-        <div className="flex items-center gap-4">
-          <Button variant="outline" size="icon" onClick={() => router.push("/dashboard")}>
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-          <div>
-            <h1 className="text-3xl font-bold">{project.name}</h1>
-            <p className="text-muted-foreground">{project.description || "No description provided"}</p>
-          </div>
-        </div>
+    <div className="min-h-screen bg-background flex flex-col">
+      <Button
+        variant="ghost"
+        size="sm"
+        className="fixed top-4 left-4 z-10 bg-background/80 backdrop-blur-sm shadow-sm hover:bg-background/90 rounded-full h-10 w-10 p-0"
+        onClick={() => router.push("/dashboard")}
+      >
+        <ArrowLeft className="h-5 w-5" />
+        <span className="sr-only">Back to dashboard</span>
+      </Button>
 
-        <div className="border rounded-lg p-8 flex items-center justify-center">
-          <div className="text-center">
-            <h2 className="text-xl font-semibold mb-2">Project Editor</h2>
-            <p className="text-muted-foreground">This is a placeholder for the project editor interface.</p>
-          </div>
-        </div>
+      <div className="flex-1 container max-w-5xl mx-auto py-12 px-4">
+        <AudioEditor
+          project={project}
+          transcription={transcription}
+          onTranscribe={handleTranscribe}
+          isTranscribing={isTranscribing}
+        />
       </div>
-    </Container>
+    </div>
   )
 }
 

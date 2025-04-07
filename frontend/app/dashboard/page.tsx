@@ -35,6 +35,11 @@ export default function DashboardPage() {
       // Update refresh key to trigger re-render
       setRefreshKey(Date.now())
 
+      // Update the local state immediately
+      if (response.data) {
+        setIsLoading(false)
+      }
+
       return response.data
     } catch (error) {
       console.error("Error refreshing user data:", error)

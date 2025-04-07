@@ -79,7 +79,8 @@ export function AudioProjectCard({ project, projectIndex, onProjectChange }: Aud
         <CardContent className="p-4">
           <h3 className="font-semibold text-lg truncate">{displayName}</h3>
           <p className="text-sm text-muted-foreground truncate mt-1">
-            {displayDescription || "No description"} • {project.extension.toUpperCase()}
+            {displayDescription || "No description"}{" "}
+            {project.extension.toUpperCase() ? `• ${project.extension.toUpperCase()}` : ""}
           </p>
         </CardContent>
         <CardFooter className="p-4 pt-0 flex flex-col items-start gap-2 border-t mt-2">

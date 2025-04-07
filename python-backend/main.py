@@ -13,10 +13,11 @@ app = FastAPI(
     version="0.1.0"
 )
 
-#Create temp directory
+# Create temp directory with absolute path
 BASE_DIR = pathlib.Path(__file__).parent.absolute()
 TEMP_DIR = os.path.join(BASE_DIR, "temp")
 os.makedirs(TEMP_DIR, exist_ok=True)
+
 
 # DO ALL ENTRYPOINTS AS "audio-api" ... slash something...
 @app.get("/audio-api/{name}")
@@ -28,11 +29,11 @@ async def say_hello(name: str):
 @app.post("/audio-api/detect-phrase")
 async def detect_phrase(
         audio_file: UploadFile = File(..., description="Audio file to analyze"),
-        phrase: str = Form(..., description="Text phrase to detect in the audio"),
-        language: str = Form("en-US", description="Language code (e.g., en-US, pl-PL)")
+        phrase: str = Form(..., description="Text phrase to detect in the audio")
 ):
     """
     Detect a text phrase in an audio file and return timestamps where it occurs.
+    Language is automatically detected by Whisper.
     """
     if not audio_file.content_type.startswith("audio/"):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="File must be an audio file")
@@ -46,13 +47,14 @@ async def detect_phrase(
             content = await audio_file.read()
             buffer.write(content)
 
-        result = detect_phrase_in_audio(temp_file_path, phrase, language)
+        result = detect_phrase_in_audio(temp_file_path, phrase)
 
         return {
             "filename": audio_file.filename,
             "phrase": phrase,
             "found": result["found"],
             "occurrences": result["occurrences"],
+            "detected_language": result["detected_language"],
             "processing_time": result["processing_time"]
         }
 
@@ -70,11 +72,11 @@ async def detect_phrase(
 
 @app.post("/audio-api/transcribe")
 async def transcribe(
-        audio_file: UploadFile = File(..., description="Audio file to analyze"),
-        language: str = Form("en-US", description="Language code (e.g., en-US, pl-PL)")
+        audio_file: UploadFile = File(..., description="Audio file to analyze")
 ):
     """
     Transcribe an audio file and detect all words with their timestamps.
+    Language is automatically detected by Whisper.
     """
     if not audio_file.content_type.startswith("audio/"):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="File must be an audio file")
@@ -88,12 +90,13 @@ async def transcribe(
             content = await audio_file.read()
             buffer.write(content)
 
-        result = transcribe_audio(temp_file_path, language)
+        result = transcribe_audio(temp_file_path)
 
         return {
             "filename": audio_file.filename,
             "transcript": result["transcript"],
             "words": result["words"],
+            "detected_language": result["detected_language"],
             "processing_time": result["processing_time"]
         }
 
@@ -121,12 +124,15 @@ async def modify_audio_endpoint(
     """
     Modify an audio file by applying a modification at the specified time range.
     """
+    #Validate file type
     if not audio_file.content_type.startswith("audio/"):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="File must be an audio file")
 
+    #Validate modification type
     if modification_type not in ["mute", "tone"]:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Modification type must be 'mute' or 'tone'")
 
+    #Validate time range
     if start_time >= end_time:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Start time must be less than end time")
 
@@ -175,5 +181,5 @@ async def health_check():
 
 if __name__ == "__main__":
     print(f"Temporary directory created at: {TEMP_DIR}")
-    uvicorn.run("main:app", host="0.0.0.0", port=8082)
+    uvicorn.run("main:app", host="0.0.0.0", port=8083)
 
