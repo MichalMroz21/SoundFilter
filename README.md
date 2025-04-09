@@ -1,5 +1,5 @@
 To run:
-- go into infrastructure and
+- go into infrastructure and type
 ```
 docker compose up -d
 ```
