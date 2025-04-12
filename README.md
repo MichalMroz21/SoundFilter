@@ -1,4 +1,4 @@
-To run:
+To run
 - go into infrastructure and do
 ```
 docker compose up -d
