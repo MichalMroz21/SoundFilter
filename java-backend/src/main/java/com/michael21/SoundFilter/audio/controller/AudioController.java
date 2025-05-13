@@ -6,6 +6,7 @@ import com.michael21.SoundFilter.auth.SecurityUtil;
 import com.michael21.SoundFilter.config.ApplicationProperties;
 import com.michael21.SoundFilter.users.AudioProject;
 import com.michael21.SoundFilter.users.User;
+import com.michael21.SoundFilter.users.data.UserResponse;
 import com.michael21.SoundFilter.util.exception.ApiException;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -41,9 +42,29 @@ public class AudioController {
             TranscriptionResult result = audioService.transcribeAudio(user, project_id);
             return ResponseEntity.ok(result);
         } catch (ApiException e) {
-            throw e; // Let the global exception handler handle it
+            throw e;
         } catch (Exception e) {
             log.error("Error transcribing audio: {}", e.getMessage(), e);
+            throw ApiException.builder()
+                    .status(HttpServletResponse.SC_INTERNAL_SERVER_ERROR)
+                    .message("Error processing audio: " + e.getMessage())
+                    .build();
+        }
+    }
+
+    @PostMapping("/{project_id}/mute-audio")
+    public ResponseEntity<UserResponse> muteAudio(
+            @AuthenticationPrincipal User user,
+            @PathVariable Long project_id,
+            @RequestParam("start_time") Double start_time,
+            @RequestParam("end_time") Double end_time
+    ) {
+        try {
+            return ResponseEntity.ok(audioService.muteAudio(user, project_id, start_time, end_time));
+        } catch (ApiException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("Error muting audio: {}", e.getMessage(), e);
             throw ApiException.builder()
                     .status(HttpServletResponse.SC_INTERNAL_SERVER_ERROR)
                     .message("Error processing audio: " + e.getMessage())

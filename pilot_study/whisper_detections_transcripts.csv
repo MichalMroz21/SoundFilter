@@ -1,0 +1,161 @@
+model,audio_file,phrase,detected_start,detected_end,actual_start,actual_end,transcript
+tiny,1-noise.mp4,cheese,2.4,2.78,2.4,2.7," I bought some fresh cheese at the park to be a swimmer, it tasted amazing with crackers and a glass of wine."
+tiny,1-noise_echo.mp4,cheese,2.42,2.78,2.4,2.7," I am not some fresh cheese, i can eat it some days, it will crack it some less if i saw it"
+tiny,1-noise_fast.mp4,cheese,,,1.6,1.9,어서 Truj Qui 왔
+tiny,1-noise_noise.mp4,cheese,,,2.4,2.7,
+tiny,1-noise_slow.mp4,cheese,,,3.2,3.8, Well over expectation. Cochbral�
+tiny,1.mp4,cheese,2.12,2.54,1.95,2.55," I bought some fresh cheese at the market yesterday, it tasted amazing with crackers and a glass of wine."
+tiny,1_echo.mp4,cheese,2.12,2.58,1.95,2.55, I bought some fresh cheese for the market yesterday and it tasted amazing with crackers and a glass of wine.
+tiny,1_fast.mp4,cheese,1.44,1.74,1.3,1.7, I bought some fresh cheese and the market yesterday. It tastes as amazing with fracas and a pleasant line.
+tiny,1_noise.mp4,cheese,,,1.95,2.55,
+tiny,1_slow.mp4,cheese,2.88,3.42,2.7,3.4," I brought some fresh cheese at the market yesterday, it tasted amazing with crackers and a glass of wine."
+tiny,2-noise.mp4,cheese,,,4.5,5.2," There are kept BulletScore flights, tournaments start from 3. Please come up together and pick for a snack."
+tiny,2-noise_echo.mp4,cheese,,,4.5,5.2, the research that we result in a lot of this did get the appropriate options
+tiny,2-noise_fast.mp4,cheese,,,3.0,3.3," Yeah, this is possibly a huge"
+tiny,2-noise_noise.mp4,cheese,,,4.5,5.2,
+tiny,2-noise_slow.mp4,cheese,,,6.0,6.8, This is the cause for free. We dance. We are free. It's not fair enough like you.
+tiny,2.mp4,cheese,4.66,5.06,4.7,5.02," The recipe calls for free ingredients, milk, flour and cheese mix them together and bake for 20 minutes."
+tiny,2_echo.mp4,cheese,4.56,5.04,4.7,5.02," There are a set of calls for three ingredients, milk, flour and cheese mixed together and a bite for 20 minutes."
+tiny,2_fast.mp4,cheese,,,3.04,3.36," If possible because pre-engrian Snake, function on the intereges ready, one may never lie to us."
+tiny,2_noise.mp4,cheese,,,4.7,5.02,
+tiny,2_slow.mp4,cheese,,,6.2,6.7," Fl!</p!</b?! Just shaped사를 Ka 1mm fast."" Kap cabbage sientes rectangular ten花 salante,"
+tiny,afrikaans1.mp3,cheese,8.0,8.34,7.9,8.3," Please call Stala, ask her to bring these things with her from the store 6 spoons of freshener peas, 5 thick slabs of blue cheese and maybe a snack for her brother-bop. We also need a small plastic snake and a big to a frog for the kids. She can scoop these things into free-dread bags and we will go meet a wind-stad train station."
+tiny,afrikaans1_echo.wav,cheese,8.02,8.32,8.02,8.4," Please call Stella, ask her to bring these things with her from those six points of free snow peas, five thick slabs of blue cheese and my base snack for her brother, brother bar. We also need a small plastic snake and a big two-way frog for the kids. She can scoop these things into free-weight bags and we will go meet the windstead train station."
+tiny,afrikaans1_fast.wav,cheese,,,5.3,5.7," This all set enable to bring boxes enjoyment , trifle G prop words, also welcome feature services to sa chromosomes form feature features features feature features experience you can see delicious sequel"
+tiny,afrikaans1_noise.wav,cheese,,,7.9,8.3, This__scaler worshipped the thing we created here by this blue fox earbehaved wild fox lick ahoe grod And also an adhesive sweltering untied wood вр theichte sort it to the inside
+tiny,afrikaans1_slow.wav,cheese,10.68,11.1,10.7,11.2," These goals teller are they to bring these things with them from those six spoons of fish in our piece, five thick slaps of blue cheese and maybe snack for her brother-bop. We also need small plastic snipe and big, tway frog play kids. She can scoop these things into free rate bags and we will go meet the Wednesday at"
+tiny,female1_anxious_14b_1.wav,worried,1.32,1.66,1.3,1.65, I am so worried about my exam results.
+tiny,female1_anxious_14b_1_echo.wav,worried,1.26,1.66,1.3,1.65, I am so worried about my exam results.
+tiny,female1_anxious_14b_1_fast.wav,worried,,,0.8,1.174, I have sobered about my exam results.
+tiny,female1_anxious_14b_1_noise.wav,worried,,,1.3,1.65,
+tiny,female1_anxious_14b_1_slow.wav,worried,1.72,2.18,1.68,2.34, I am so worried about my exerosults.
+tiny,female1_assertive_14a_2.wav,try,0.54,1.1,0.6,1.07, Please try to do your exercises next time.
+tiny,female1_assertive_14a_2_echo.wav,try,0.58,1.12,0.6,1.07, Please try to do your exercises next time.
+tiny,female1_assertive_14a_2_fast.wav,try,0.46,0.74,0.488,0.8, Please try to do your exercises next time.
+tiny,female1_assertive_14a_2_noise.wav,try,,,0.6,1.07,
+tiny,female1_assertive_14a_2_slow.wav,try,0.78,1.5,1.0,1.6, Please try to do your exercises next time.
+tiny,female1_encouraging_4b_2.wav,likes,0.7,1.2,0.7,1.16, Taylor likes Jude Asian food.
+tiny,female1_encouraging_4b_2_echo.wav,likes,0.62,1.1,0.7,1.16, Taylor likes Jude Asian food.
+tiny,female1_encouraging_4b_2_fast.wav,likes,0.46,0.8,0.65,0.79, Taylor likes to eat a food.
+tiny,female1_encouraging_4b_2_noise.wav,likes,,,0.7,1.16,
+tiny,female1_encouraging_4b_2_slow.wav,likes,0.82,1.58,1.0,1.55, Taylor likes Jude Asian food.
+tiny,french1.mp3,cheese,11.36,11.84,11.3,11.8," Please co-stella, as her to bring these things with her from the star, 6 spoons of fresh snow, fresh snow peas, 5 thick slabs of blue cheese, and maybe a snack for her brother Bob. We also need a small plastic snack and a big toy frog for the kids. She can scoops these things into three red bags, and we will go meet her Wednesday at the twin station."
+tiny,french1_echo,cheese,11.38,11.84,11.3,11.7," Please call Stella, ask her to bring these things with her from the star, six spoons of fresh snow, fresh snow peas, five big slaves of blue cheese and maybe a snack for her brother, but we also need a small plastic snack and a big toy frog for the kids. She can scoop these things into three red bags and we will go meet meeters Wednesday at the twin station."
+tiny,french1_fast.wav,cheese,7.62,7.9,7.7,8.1," Please go to the lab as her to bring these things with her for the star 6 months of personal first new piece, 5X legs of the cheese and it is not horrible above. We also need a smaller 6-neck and a bit more proper against. She can skip these things into three my bags and we will go meet me her as a manager at the transition."
+tiny,french1_noise.wav,cheese,,,11.3,11.8, Magically we clean the wood we can see that we were going out of the same tässäitegent lines together and we will build the wood into the sinus and now we are going to fit the gayx other Ministry of Oil.
+tiny,french1_slow.wav,cheese,15.14,15.74,15.1,15.8," Please co-stella, ask her to bring these things with her from the star, the experience of fresh snow. Fresh snow, peas, five eggs, slaves of the cheese, and maybe a snack for her brother-bub. We also need a small plastic snack and a big toy frog for the kids. She can scoop this thing into three red bags and we will go meet mehors Wednesday at the transition."
+tiny,german1.mp3,cheese,11.02,11.42,10.8,11.2," Please call Stella, ask her to bring these things with her from the store. Six spoons of fresh snow peas, five, six slaps of blue cheese, and maybe a snack for her brother barb. We also need a small plastic snake and a big toy frog for the kids. She can scoop these things into three red bags and we will go meet her Wednesday at the train station."
+tiny,german1_echo.wav,cheese,11.02,11.52,10.8,11.3," Please call Stella, ask her to bring these things with her from the store. Six spoons of fresh snow peas, five, six slabs of blue cheese, and maybe a snack for her brother-bub. We also need a small plastic snake and a big toy for the kids. She can scoop these things into three-bed bags and we will go meet her Wednesday at the train station."
+tiny,german1_fast.wav,cheese,7.36,7.64,7.4,7.8," Please call Stella, ask her to bring these things with her from the store. Sixth of fresh snow peas, five, six laps of blue cheese, and many a snack for her brother bath. We also need a smaller pastix snake and a big toy frog for the kids. She can scoop these things into three red bags and we will go meet her Wednesday at the train station."
+tiny,german1_noise.wav,cheese,,,10.8,11.3," Please call Stella, ask her to bring these things with her from the store. Six spoons of flesh, snow peas, five, six slacks of luchis, and maybe a snack for her brother bath. We also need a small plastic snack and a big toy box for the kids. She can scoop these things into three red bags and we will go on a meal one day at the same station."
+tiny,german1_slow.wav,cheese,14.7,15.24,14.5,15.2," Please call Stella, ask her to bring these things with her from the store. Six spoons of fresh snow peas, five, six laps of blue cheese, and maybe a snack for her brother-bap. We also need a small plastic snack and a big toy frog for the kids. She can scoop these things into sweet red bags and we will go meet her one day at the train station."
+tiny,p232_003.wav,cheese,4.38,4.82,4.35,5.2," 6. Boons of fresh snowbees, 5 thick slabs of blue cheese, and maybe a snack will have rather bob."
+tiny,p232_003_c.wav,cheese,4.4,4.82,4.348,4.8," 6. Boons of fresh snowbees, 5 thick slabs of blue cheese, and maybe a snack will have rather bob."
+tiny,p232_003_echo.wav,cheese,4.4,4.9,4.35,5.2," 6 spoons of fresh nobys, 5 thick slabs of blue cheese, and maybe a snack will have rather the ball."
+tiny,p232_003_echo_c.wav,cheese,4.4,4.84,4.348,4.8," 6 spoons of fresh snow bees, 5 thick slabs of blue cheese, and maybe a snack will have rather bob."
+tiny,p232_003_fast.wav,cheese,2.92,3.24,2.9,3.3," 6. Buying the fresh nobys, quite thick slabs of blue cheese, and any snack we'll ever love all."
+tiny,p232_003_fast_c.wav,cheese,,,2.9,3.2, 6. When's a fresh snow geese? 5. Thicks lobster blue geese. And maybe a sack will have all the ball.
+tiny,p232_003_noise.wav,cheese,4.4,4.94,4.35,5.2," 6 spoons of fresh snowbees, 5-6 slabs of blue cheese, and maybe a snack with a brother ball."
+tiny,p232_003_noise_c.wav,cheese,4.4,4.9,4.348,4.8," 6 spoons of fresh snow peas, 5-6 lbs of blue cheese, and maybe a snack will have rubber balls."
+tiny,p232_003_slow.wav,cheese,5.84,6.36,5.7,6.5," 6. Buens of fresh snow bees, 5. Thicks labs of blue cheese, and maybe a snack will have rather bob."
+tiny,p232_003_slow_c.wav,cheese,5.84,6.36,5.745,6.5," 6. Buen's of fresh snow bees, 5. Thicks laps of blue cheese, and maybe a snack for her brother bulb."
+tiny,p232_005.wav,bags,2.6,3.06,2.43,3.2, She can scoop these things into three red bags and we will go meet her Wednesday at the train station.
+tiny,p232_005_c.wav,bags,2.6,3.04,2.5,3.0, She can scoop these things into three red bags and we will go meet her Wednesday at the train station.
+tiny,p232_005_echo.wav,bags,2.62,3.04,2.43,3.2," She can scoop these things into three red bags, and we will go meet her Wednesday at the train station."
+tiny,p232_005_echo_c.wav,bags,2.64,3.04,2.5,3.0, She can scoop these things into three red bags and we will go meet her Wednesday at the train station.
+tiny,p232_005_fast.wav,bags,1.78,2.16,1.68,2.0, She has suit these things into three red bags and we will go to the Wednesday at the sensation.
+tiny,p232_005_fast_c.wav,bags,1.78,2.06,1.7,2.05," She can suit these things into three red bags, and we will go meet her Wednesday at the transition."
+tiny,p232_005_noise.wav,bags,2.64,3.14,2.43,3.2, She can scoop these things into three red bags and we will go meet her Wednesday at the train station.
+tiny,p232_005_noise_c.wav,bags,2.62,3.14,2.5,3.0, She can scoop these things into three red bags and we will go meet her Wednesday at the train station.
+tiny,p232_005_slow.wav,bags,3.48,4.14,3.3,4.0," She can scoop these things into three red bags, and we will go meet her right and stay at the train station."
+tiny,p232_005_slow_c.wav,bags,3.48,4.06,3.4,4.08," She can scoop these things into three red bags, and we will go meet her Wednesday at the train station."
+tiny,p232_011.wav,reach,2.16,2.62,2.071,2.58," When a man looks for something beyond his reach, his friends say he's looking for the pot of gold at the end of the rainbow."
+tiny,p232_011_c.wav,reach,2.18,2.56,2.075,2.5," When a man looks for something beyond his reach, his friends say he's looking for the pot of gold at the end of the rainbow."
+tiny,p232_011_echo.wav,reach,2.18,2.62,2.071,2.58," When a man looked for something beyond his reach, his friends say he's looking for the pot of gold at the end of the rainbow."
+tiny,p232_011_echo_c.wav,reach,2.18,2.64,2.075,2.5," When a man looked for something beyond his reach, his friends say he's looking for the pot of gold at the end of the rainbow."
+tiny,p232_011_fast.wav,reach,1.4,1.7,1.4,1.66," When I look for something you're to reach, the friends they're looking for, they're the end of rainbow."
+tiny,p232_011_fast_c.wav,reach,1.42,1.74,1.26,1.67," When I looked for something you have to reach, his friends say he's living the hot cold at the end of the rainbow."
+tiny,p232_011_noise.wav,reach,2.28,2.78,2.071,2.58," When a man looks for something the other is reached, his friends say he is looking for the port of gold at the end of the rainbow."
+tiny,p232_011_noise_c.wav,reach,2.24,2.78,2.075,2.5," When a man looks for something the other's reach, his friends say he is looking for the pot of gold at the end of the rainbow."
+tiny,p232_011_slow.wav,reach,2.88,3.3,2.75,3.3," When a man looks for something beautiful is reach, his friends say he's looking for the goal at the end of the rainbow."
+tiny,p232_011_slow_c.wav,reach,2.9,3.44,2.75,3.3," What man looks for something beyond his reach is, friends say he is looking for the goal of the end of the rainbow."
+large,1-noise.mp4,cheese,2.2,2.6,2.4,2.7," I bought some fresh cheese at the market yesterday, it tastes amazing with crackers and a glass of wine."
+large,1-noise_echo.mp4,cheese,2.2,2.6,2.4,2.7," I bought some fresh cheese at the market yesterday, it tastes amazing with crackers and a glass of wine."
+large,1-noise_fast.mp4,cheese,,,1.6,1.9," Thank you so much, Jason. We hope you have a nice and easy progress in the next one."
+large,1-noise_noise.mp4,cheese,,,2.4,2.7, I note some bad things that were parted yesterday in place of the nation's progress in the last moment.
+large,1-noise_slow.mp4,cheese,2.92,3.48,3.2,3.8, I love some french cheese that I bought yesterday. It tastes just amazing. My crackers and my glass of wine.
+large,1.mp4,cheese,1.88,2.32,1.95,2.55, I bought some fresh cheese at the market yesterday. It tastes amazing with crackers and a glass of wine.
+large,1_echo.mp4,cheese,1.88,2.32,1.95,2.55, I bought some fresh cheese at the market yesterday. It tastes amazing with crackers and a glass of wine.
+large,1_fast.mp4,cheese,1.24,1.54,1.3,1.7, I bought some fresh cheese at the market yesterday. It tastes just amazing with crackers and a glass of wine.
+large,1_noise.mp4,cheese,,,1.95,2.55," I bless you, my Lord, and I will bless you, my Lord, and I will bless you, my Lord."
+large,1_slow.mp4,cheese,2.48,3.08,2.7,3.4, I bought some fresh cheese at the market yesterday. It tastes amazing with crackers and a glass of wine.
+large,2-noise.mp4,cheese,4.44,4.82,4.5,5.2," The recipe calls for three ingredients, milk, flour and cheese. Mix them together and bake for 30 minutes."
+large,2-noise_echo.mp4,cheese,4.44,4.84,4.5,5.2," The recipe calls for three ingredients, milk, flour and cheese. Mix them together and bake for 20 minutes."
+large,2-noise_fast.mp4,cheese,,,3.0,3.3,
+large,2-noise_noise.mp4,cheese,,,4.5,5.2," The rest of the cost will be in the year 2023, which will be very effective as well."
+large,2-noise_slow.mp4,cheese,5.84,6.42,6.0,6.8," The recipe calls for three ingredients, eight flour, cheese, and eggs, put together and baked for 50 minutes."
+large,2.mp4,cheese,4.32,4.72,4.7,5.02," The recipe calls for three ingredients, milk, flour and cheese. Mix them together and bake for 20 minutes."
+large,2_echo.mp4,cheese,4.36,4.72,4.7,5.02," The recipe calls for three ingredients, milk, flour and cheese. Mix them together and bake for 20 minutes."
+large,2_fast.mp4,cheese,2.9,3.16,3.04,3.36," The recipe calls for three ingredients, milk, flour and cheese. Mix them together and bake for 20 minutes."
+large,2_noise.mp4,cheese,,,4.7,5.02," Det er 50 kroner i dag, vi er i dag, vi er i dag, vi er i dag, vi er i dag, vi er i dag."
+large,2_slow.mp4,cheese,5.82,6.3,6.2,6.7," The recipe calls for three ingredients, milk, flour and cheese. Mix them together and bake for 20 minutes."
+large,afrikaans1.mp3,cheese,7.76,8.06,7.9,8.3," Please call Stella, ask her to bring these things with her from the store. Six spoons of fresh snow peas, five thick slabs of blue cheese and maybe a snack for her brother Bob. We also need a small plastic snake and a big toy frog for the kids. She can scoop these things into free red bags and we will go meet her Wednesday at the train station."
+large,afrikaans1_echo.wav,cheese,7.76,8.08,8.02,8.4," Please call Stella, ask her to bring these things with her from the store. Six spoons of fresh snow peas, five thick slabs of blue cheese and maybe a snack for her brother Bob. We also need a small plastic snake and a big toy frog for the kids. She can scoop these things into three red bags and we will go meet her Wednesday at the train station."
+large,afrikaans1_fast.wav,cheese,5.16,5.38,5.3,5.7," Please call Stella. Ask her to bring these things with her. From this there were 6 spoons of fresh snow peas, 5 thick slabs of blue cheese and maybe a snack for her brother Bob. We also need a small plastic snake and a big toy frog for the kids. She can scoop these things into free red bags and we will go meet her Wednesday at the train station."
+large,afrikaans1_noise.wav,cheese,7.78,8.08,7.9,8.3," He's called Stella. Ask her to bring these things with her from the store. Six spoons of fresh snow peas, five thick slabs of blue cheese and maybe a snack for her brother Bob. We also need a small plastic snake and a big toy frog for the kids. She can scoop these things into three red bags and we will go meet her room stay at the train station."
+large,afrikaans1_slow.wav,cheese,10.34,10.74,10.7,11.2," Please call Stella, ask her to bring these things with her from the store. Six spoons of fresh snow peas, five thick slabs of blue cheese and maybe a snack for her brother Bob. We also need a small plastic snake and a big toy frog for the kids. She can scoop these things into three red bags and we will go meet her Wednesday at the train station."
+large,female1_anxious_14b_1.wav,worried,0.86,1.42,1.3,1.65, I am so worried about my exam results.
+large,female1_anxious_14b_1_echo.wav,worried,0.88,1.42,1.3,1.65, I am so worried about my exam results.
+large,female1_anxious_14b_1_fast.wav,worried,0.58,0.96,0.8,1.174, I am so worried about my exam results.
+large,female1_anxious_14b_1_noise.wav,worried,,,1.3,1.65,
+large,female1_anxious_14b_1_slow.wav,worried,1.16,1.88,1.68,2.34, I am so worried about my exam results.
+large,female1_assertive_14a_2.wav,try,0.42,0.74,0.6,1.07, Please try to do your exercises next time.
+large,female1_assertive_14a_2_echo.wav,try,0.42,0.76,0.6,1.07, Please try to do your exercises next time.
+large,female1_assertive_14a_2_fast.wav,try,0.28,0.5,0.488,0.8, Please try to do your exercises next time.
+large,female1_assertive_14a_2_noise.wav,try,,,0.6,1.07, 감사합니다.
+large,female1_assertive_14a_2_slow.wav,try,0.56,1.0,1.0,1.6, Please try to do your exercises next time.
+large,female1_encouraging_4b_2.wav,likes,0.52,0.9,0.7,1.16, Taylor likes Jude Asian food.
+large,female1_encouraging_4b_2_echo.wav,likes,0.52,0.92,0.7,1.16, Taylor likes Jude Asian food.
+large,female1_encouraging_4b_2_fast.wav,likes,0.34,0.6,0.65,0.79, Taylor likes to eat Asian food.
+large,female1_encouraging_4b_2_noise.wav,likes,,,0.7,1.16,
+large,female1_encouraging_4b_2_slow.wav,likes,0.68,1.2,1.0,1.55, Taylor likes stewed Asian food.
+large,french1.mp3,cheese,11.14,11.5,11.3,11.8," Please call Stella. Ask her to bring these things with her from the store. Six spoons of fresh snow peas, five thick slices of blue cheese, and maybe a snack for her brother Bob. We also need a small plastic snack and a big toy frog for the kids. She can scoop these things into three red bags, and we will go meet her Wednesday at the train station."
+large,french1_echo,cheese,11.14,11.48,11.3,11.7," Please call Stella, ask her to bring these things with her from the store. Six spoons of fresh snow peas, five thick slices of blue cheese and maybe a snack for her brother Bob. We also need a small plastic snack and a big toy frog for the kids. She can scoop these things into three red bags and we will go meet her Wednesday at the train station. We will go meet her Wednesday at the train station."
+large,french1_fast.wav,cheese,7.4,7.64,7.7,8.1," Please call Stella. Ask her to bring these things with her from the store. Six spoons of fresh snow peas, five thick slices of blue cheese, and maybe a snack for her brother Bob. We also need a small plastic snake and a big toy frog for the kids. She can scoop these things into three red bags, and we will go meet her Wednesday at the train station."
+large,french1_noise.wav,cheese,,,11.3,11.8," Please call Stella, ask her for doing the things with her from the store. 6 spoons of fresh snow tea, 5-6 slices of goji berries and maybe a snack for her brother Bob. We also need a small glass of smoke and a big store box for the kids. She can scoop the things into 3 red bags and we will go meet her one of day at the train station."
+large,french1_slow.wav,cheese,14.84,15.3,15.1,15.8," Please call Stella. Ask her to bring these things with her from the store. Six spoons of fresh snow peas, five thick slices of blue cheese, and maybe a snack for her brother Bob. We also need a small plastic snack and a big toy frog for the kids. She can scoop these things into three red bags and we will go meet her Wednesday at the train station."
+large,german1.mp3,cheese,10.76,11.14,10.8,11.2," Please call Stella. Ask her to bring these things with her from the store. Six spoons of fresh snow peas, six slabs of blue cheese, and maybe a snack for her brother Bob. We also need a small plastic snake and a big toy frog for the kids. She can scoop these things into three red bags and we will go meet her Wednesday at the train station."
+large,german1_echo.wav,cheese,10.76,11.14,10.8,11.3," Please call Stella. Ask her to bring these things with her from the store. Six spoons of fresh snow peas, five, six slabs of blue cheese, and maybe a snack for her brother Bob. We also need a small plastic snake and a big toy frog for the kids. She can scoop these things into three red bags and we will go meet her Wednesday at the train station."
+large,german1_fast.wav,cheese,7.16,7.44,7.4,7.8," Please call Stella. Ask her to bring these things with her from the store. Six spoons of fresh snow peas, five, six slabs of blue cheese, and maybe a snack for her brother Bob. We also need a small plastic snake and a big toy frog for the kids. She can scoop these things into three red bags and we will go meet her Wednesday at the train station."
+large,german1_noise.wav,cheese,10.8,11.12,10.8,11.3," Please call Stella. Ask her to bring these things with her from the store. Six spoons of fresh snow peas, five thick slabs of blue cheese, and maybe a snack for her brother Bob. We also need a small plastic snake and a big toy frog for the kids. She can scoop these things into three red bags and we will go meet her Wednesday at the train station."
+large,german1_slow.wav,cheese,14.32,14.84,14.5,15.2," Please call Stella. Ask her to bring these things with her from the store. Six spoons of fresh snow peas, five, six slabs of blue cheese, and maybe a snack for her brother Bob. We also need a small plastic snake and a big toy frog for the kids. She can scoop these things into three red bags and we will go meet her Wednesday at the train station."
+large,p232_003.wav,cheese,4.12,4.52,4.35,5.2," Six spoons of fresh snow peas, five thick slabs of blue cheese, and maybe a snack for her brother Bob."
+large,p232_003_c.wav,cheese,4.12,4.54,4.348,4.8," Six spoons of fresh snow peas, five thick slabs of blue cheese, and maybe a snack for her brother Bob."
+large,p232_003_echo.wav,cheese,4.14,4.52,4.35,5.2," Six spoons of fresh snow peas, five thick slabs of blue cheese, and maybe a snack for her brother Bob."
+large,p232_003_echo_c.wav,cheese,4.14,4.54,4.348,4.8," Six spoons of fresh snow peas, five thick slabs of blue cheese, and maybe a snack for her brother Bob."
+large,p232_003_fast.wav,cheese,2.74,3.02,2.9,3.3," Six spoons of fresh snow peas, five thick slabs of blue cheese, and maybe a snack for her brother Bob."
+large,p232_003_fast_c.wav,cheese,2.74,3.0,2.9,3.2," 6 spoons of fresh snow peas, 5 thick slabs of blue cheese, and maybe a snack for her brother Bob."
+large,p232_003_noise.wav,cheese,4.12,4.52,4.35,5.2," 6 spoons of fresh snow peas, 5 thick slabs of blue cheese, and maybe a snack for her brother Bob."
+large,p232_003_noise_c.wav,cheese,4.12,4.52,4.348,4.8," 6 spoons of fresh snow peas, 5 thick slabs of blue cheese, and maybe a snack for her brother Bob."
+large,p232_003_slow.wav,cheese,5.5,5.96,5.7,6.5," Six spoons of fresh snow bees, five thick slabs of blue cheese, and maybe a snack for her brother Bob."
+large,p232_003_slow_c.wav,cheese,5.5,6.0,5.745,6.5, six spoons of fresh snow-bees five thick slabs of blue cheese and maybe a snack for her brother bob Bob
+large,p232_005.wav,bags,2.4,2.78,2.43,3.2," She can scoop these things into three red bags, and we will go meet her Wednesday at the train station."
+large,p232_005_c.wav,bags,2.4,2.78,2.5,3.0," She can scoop these things into three red bags, and we will go meet her Wednesday at the train station."
+large,p232_005_echo.wav,bags,2.42,2.78,2.43,3.2," She can scoop these things into three red bags, and we will go meet her Wednesday at the train station."
+large,p232_005_echo_c.wav,bags,2.42,2.8,2.5,3.0," She can scoop these things into three red bags, and we will go meet her Wednesday at the train station."
+large,p232_005_fast.wav,bags,1.62,1.82,1.68,2.0," She can scoop these things into three red bags, and we will go meet her Wednesday at the train station."
+large,p232_005_fast_c.wav,bags,1.6,1.82,1.7,2.05," She can scoop these things into three red bags, and we will go meet her Wednesday at the train station."
+large,p232_005_noise.wav,bags,2.4,2.76,2.43,3.2," She can scoop these things into three red bags, and we will go meet her Wednesday at the train station."
+large,p232_005_noise_c.wav,bags,2.4,2.76,2.5,3.0, She can scoop these things into three red bags and we will go meet her Wednesday at the train station.
+large,p232_005_slow.wav,bags,3.2,3.62,3.3,4.0," She can scoop these things into three red bags, and we will go meet her Wednesday at the train station."
+large,p232_005_slow_c.wav,bags,3.2,3.6,3.4,4.08," She can scoop these things into three red bags, and we will go meet her Wednesday at the train station."
+large,p232_011.wav,reach,1.94,2.26,2.071,2.58," When a man looks for something beyond his reach, his friends say he is looking for the pot of gold at the end of the rainbow."
+large,p232_011_c.wav,reach,1.94,2.26,2.075,2.5," When a man looks for something beyond his reach, his friends say he is looking for the pot of gold at the end of the rainbow."
+large,p232_011_echo.wav,reach,1.94,2.32,2.071,2.58," When a man looks for something beyond his reach, his friends say he is looking for the pot of gold at the end of the rainbow."
+large,p232_011_echo_c.wav,reach,1.94,2.34,2.075,2.5," When a man looks for something beyond his reach, his friends say he is looking for the pot of gold at the end of the rainbow."
+large,p232_011_fast.wav,reach,1.28,1.52,1.4,1.66," When a man looks for something beyond his reach, his friends say he is looking for the bottom gold at the end of the rainbow."
+large,p232_011_fast_c.wav,reach,1.3,1.52,1.26,1.67," When a man looks for something beyond his reach, his friends say he's looking for the pot of gold at the end of the rainbow."
+large,p232_011_noise.wav,reach,1.94,2.26,2.071,2.58," When a man looks for something beyond his reach, his friends say he is looking for the pot of gold at the end of the rainbow."
+large,p232_011_noise_c.wav,reach,1.94,2.26,2.075,2.5," When a man looks for something beyond his reach, his friends say he is looking for the pot of gold at the end of the rainbow."
+large,p232_011_slow.wav,reach,2.58,3.02,2.75,3.3," When a man looks for something beyond his reach, his friends say he is looking for the pot of gold at the end of the rainbow."
+large,p232_011_slow_c.wav,reach,2.58,3.0,2.75,3.3," When a man looks for something beyond his reach, his friends say he is looking for the pot of gold at the end of the rainbow."

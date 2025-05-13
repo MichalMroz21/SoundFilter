@@ -42,8 +42,8 @@ public class AudioService {
     private final ObjectMapper objectMapper;
     private final ApplicationProperties applicationProperties;
 
-    public AudioProject getAudioProject(User user, Long project_id) {
-        AudioProject audioProject = audioProjectRepository.findById(project_id)
+    public AudioProject getAudioProject(User user, Long projectId) {
+        AudioProject audioProject = audioProjectRepository.findById(projectId)
                 .orElseThrow(() -> ApiException.builder().status(HttpServletResponse.SC_NOT_FOUND).
                         message("Project not found").build());
 
@@ -97,28 +97,6 @@ public class AudioService {
 
         try {
             log.info("Sending audio file to Python API for transcription");
-            RestTemplate restTemplate = new RestTemplate();
-
-            MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-
-            ByteArrayResource resource = new ByteArrayResource(audioData) {
-                @Override
-                public String getFilename() {
-                    return fileName;
-                }
-            };
-
-            body.add("audio_file", resource);
-
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.MULTIPART_FORM_DATA);
-
-            HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
-
-            ResponseEntity<String> response = restTemplate.postForEntity(
-                    applicationProperties.getBaseUrl() + "/audio-api/transcribe",
-                    requestEntity,
-                    String.class);
 
             log.info("Received response from Python API with status: {}", response.getStatusCode());
 
@@ -138,5 +116,13 @@ public class AudioService {
                     .message("Error processing audio: " + e.getMessage())
                     .build();
         }
+    }
+
+    public UserResponse muteAudio(User user, Long project_id,
+                                  Double start_time, Double end_time) {
+        AudioProject audioProject = getAudioProject(user, project_id);
+        String audioUrl = audioProject.getAudioUrl();
+
+
     }
 }

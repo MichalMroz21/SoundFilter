@@ -9,6 +9,8 @@ import torch
 import numpy as np
 
 # Check if CUDA is available
+MODEL_SIZE = 'tiny'
+
 CUDA_AVAILABLE = torch.cuda.is_available()
 if CUDA_AVAILABLE:
     print(f"CUDA is available. Using GPU for Whisper.")
@@ -18,8 +20,8 @@ else:
     DEVICE = torch.device("cpu")
 
 # Load Whisper model globally
-print("Loading Whisper model...")
-MODEL = whisper.load_model("base")
+print("Loading " + MODEL_SIZE + " Whisper model...")
+MODEL = whisper.load_model(MODEL_SIZE)
 
 # Move model to GPU if CUDA is available
 if CUDA_AVAILABLE:

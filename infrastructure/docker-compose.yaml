@@ -14,6 +14,22 @@ services:
       - sound-filter-db:/var/lib/mysql
     networks:
       - app_net
+      
+  localstack:
+    image: localstack/localstack:latest
+    container_name: localstack
+    ports:
+      - "4566:4566"            
+    environment:
+      - SERVICES=s3
+      - DEBUG=1
+      - DATA_DIR=/tmp/localstack_data
+      - AWS_DEFAULT_REGION=eu-central-1
+    volumes:
+      - "localstack-data:/tmp/localstack_data"
+    networks:
+      - app_net
+      
   mailpit:
     image: axllent/mailpit
     container_name: mailpit
@@ -28,6 +44,9 @@ services:
       HP_DATABASE: /data/mailpit.db
       HP_SMTP_AUTH_ACCEPT_ANY: 1
       HP_SMTP_AUTH_ALLOW_INSECURE: 1
+    networks:
+      - app_net
+      
   caddy:
     image: caddy:latest
     container_name: caddy
@@ -36,8 +55,14 @@ services:
     ports:
       - "8080:8080"
     restart: unless-stopped
+    networks:
+      - app_net
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
 networks:
   app_net:
     driver: bridge
 volumes:
   sound-filter-db:
+  localstack-data:
