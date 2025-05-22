@@ -1,59 +1,30 @@
 package com.michael21.SoundFilter.audio;
 
-import com.michael21.SoundFilter.config.ApplicationProperties;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.michael21.SoundFilter.util.exception.ApiException;
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.ByteArrayResource;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
+import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
+import com.michael21.SoundFilter.config.ApplicationProperties;
 
 import java.util.Map;
 
+@Slf4j
+@Component
+@RequiredArgsConstructor
 public class AudioUtil {
-    public static String determineContentType(String extension) {
-        switch (extension.toLowerCase()) {
-            case "mp3":
-                return "audio/mpeg";
-            case "wav":
-                return "audio/wav";
-            case "ogg":
-                return "audio/ogg";
-            case "flac":
-                return "audio/flac";
-            case "aac":
-                return "audio/aac";
-            default:
-                return "application/octet-stream";
-        }
-    }
 
-    /**
-     * Makes a request to the Python API with configurable endpoint and response type
-     *
-     * @param audioData The audio file data as byte array
-     * @param fileName The name of the audio file
-     * @param endpoint The API endpoint to call (e.g., "/audio-api/transcribe")
-     * @param additionalParams Additional parameters to include in the request
-     * @param responseType The class type for the response
-     * @param <T> The type of response expected
-     * @return ResponseEntity containing the response from the Python API
-     */
-    /**
-     * Makes a request to the Python API with configurable endpoint and response type
-     *
-     * @param audioData The audio file data as byte array
-     * @param fileName The name of the audio file
-     * @param endpoint The API endpoint to call (e.g., "/audio-api/transcribe")
-     * @param additionalParams Additional parameters to include in the request
-     * @param responseType The class type for the response
-     * @param <T> The type of response expected
-     * @return The response from the Python API converted to the specified type
-     * @throws ApiException If there's an error calling the API
-     */
+    private final RestTemplate restTemplate;
+    private final ObjectMapper objectMapper;
+    private final ApplicationProperties applicationProperties;
+
     public <T> T callPythonApi(
             byte[] audioData,
             String fileName,
@@ -90,7 +61,23 @@ public class AudioUtil {
             // Create the request entity
             HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
 
-            // Make the request
+            // For binary responses (byte[]), use exchange method instead of postForEntity
+            if (responseType == byte[].class) {
+                log.info("Expecting binary response, using exchange method");
+                ResponseEntity<byte[]> response = restTemplate.exchange(
+                        applicationProperties.getBaseUrl() + endpoint,
+                        org.springframework.http.HttpMethod.POST,
+                        requestEntity,
+                        byte[].class);
+
+                log.info("Received binary response with status: {}, content length: {}",
+                        response.getStatusCode(),
+                        response.getBody() != null ? response.getBody().length : 0);
+
+                return (T) response.getBody();
+            }
+
+            // For other response types, use postForEntity as before
             ResponseEntity<String> response = restTemplate.postForEntity(
                     applicationProperties.getBaseUrl() + endpoint,
                     requestEntity,

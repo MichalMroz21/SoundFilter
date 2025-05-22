@@ -13,7 +13,7 @@ import httpClient from "@/lib/httpClient"
 import { toast } from "sonner"
 
 export default function ProjectEditPage() {
-  const { user } = useAuthGuard({ middleware: "auth" })
+  const { user, mutate } = useAuthGuard({ middleware: "auth" })
   const params = useParams()
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(true)
@@ -21,15 +21,62 @@ export default function ProjectEditPage() {
   const [transcription, setTranscription] = useState<TranscriptionResult | null>(null)
   const [isTranscribing, setIsTranscribing] = useState(false)
 
+  // Function to refresh project data
+  const refreshProjectData = async () => {
+    try {
+      // Get the current audio URL before refreshing
+      const currentAudioUrl = project?.audioUrl;
+
+      const response = await httpClient.get("/api/auth/me", {
+        headers: {
+          "Cache-Control": "no-cache, no-store, must-revalidate",
+          Pragma: "no-cache",
+          Expires: "0",
+        },
+      });
+
+      // Update the SWR cache with the new data
+      await mutate(response.data, false);
+
+      // Find and update the project
+      const projectId = params.id as string;
+      const updatedProject = response.data.audioProjects?.find((p: AudioProject) => p.id.toString() === projectId);
+      if (updatedProject) {
+        // If we have a current audio URL, use it instead of the server's URL
+        if (currentAudioUrl) {
+          updatedProject.audioUrl = currentAudioUrl;
+        }
+        setProject(updatedProject);
+      }
+    } catch (error) {
+      console.error("Error refreshing project data:", error);
+    }
+  };
+
+  // Replace the useEffect hook with this simpler version
   useEffect(() => {
     if (user) {
       const projectId = params.id as string
       const foundProject = user.audioProjects?.find((p) => p.id.toString() === projectId)
+
+      // Check if we have a refresh parameter in the URL
+      if (typeof window !== "undefined" && foundProject) {
+        const urlParams = new URLSearchParams(window.location.search)
+        if (urlParams.has("refresh")) {
+          // Remove the refresh parameter from the URL without reloading the page
+          const newUrl = window.location.pathname
+          window.history.replaceState({}, document.title, newUrl)
+          // Refresh the project data
+          refreshProjectData();
+        }
+      }
+
       setProject(foundProject || null)
       setIsLoading(false)
     }
   }, [user, params.id])
 
+  // Update the handleTranscribe function to be simpler
   const handleTranscribe = async () => {
     if (!project) return
 
@@ -81,9 +128,9 @@ export default function ProjectEditPage() {
           transcription={transcription}
           onTranscribe={handleTranscribe}
           isTranscribing={isTranscribing}
+          onProjectUpdate={refreshProjectData}
         />
       </div>
     </div>
   )
 }
-

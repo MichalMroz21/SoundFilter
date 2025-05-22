@@ -1,28 +1,42 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Response, status
 from typing import Optional, List, Dict
 import uvicorn
 import os
 import pathlib
+import threading
 
 from audio.speech_processor import detect_phrase_in_audio, transcribe_audio
-from audio.audio_modifier import modify_audio
+from audio.audio_modifier import modify_audio, replace_with_tts, load_tts_model
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    thread = threading.Thread(target=load_tts_model, daemon=True)
+    thread.start()
+
+    yield
+    pass
 
 app = FastAPI(
     title="SoundFilter Audio API",
     description="API for detecting phrases in audio files",
-    version="0.1.0"
+    version="0.1.0",
+    lifespan=lifespan
 )
 
-# Create temp directory with absolute path
 BASE_DIR = pathlib.Path(__file__).parent.absolute()
 TEMP_DIR = os.path.join(BASE_DIR, "temp")
 os.makedirs(TEMP_DIR, exist_ok=True)
 
+@app.get("/tts/status")
+async def tts_status():
+    from audio.audio_modifier import get_download_status
+    return get_download_status()
 
-# DO ALL ENTRYPOINTS AS "audio-api" ... slash something...
+
 @app.get("/audio-api/{name}")
 async def say_hello(name: str):
-    print(f"Received request for /audio-api/{name}")
     return {"message": f"Hello {name}"}
 
 
@@ -31,10 +45,6 @@ async def detect_phrase(
         audio_file: UploadFile = File(..., description="Audio file to analyze"),
         phrase: str = Form(..., description="Text phrase to detect in the audio")
 ):
-    """
-    Detect a text phrase in an audio file and return timestamps where it occurs.
-    Language is automatically detected by Whisper.
-    """
     if not audio_file.content_type.startswith("audio/"):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="File must be an audio file")
 
@@ -59,10 +69,10 @@ async def detect_phrase(
         }
 
     except Exception as e:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Error processing audio: {str(e)}")
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                            detail=f"Error processing audio: {str(e)}")
 
     finally:
-        #Clean up the temporary file
         if os.path.exists(temp_file_path):
             try:
                 os.remove(temp_file_path)
@@ -74,10 +84,6 @@ async def detect_phrase(
 async def transcribe(
         audio_file: UploadFile = File(..., description="Audio file to analyze")
 ):
-    """
-    Transcribe an audio file and detect all words with their timestamps.
-    Language is automatically detected by Whisper.
-    """
     if not audio_file.content_type.startswith("audio/"):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="File must be an audio file")
 
@@ -101,10 +107,10 @@ async def transcribe(
         }
 
     except Exception as e:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Error processing audio: {str(e)}")
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                            detail=f"Error processing audio: {str(e)}")
 
     finally:
-        #Clean up the temporary file
         if os.path.exists(temp_file_path):
             try:
                 os.remove(temp_file_path)
@@ -121,22 +127,16 @@ async def modify_audio_endpoint(
         tone_frequency: Optional[int] = Form(440, description="Frequency of tone in Hz (only for 'tone' type)"),
         output_format: str = Form("wav", description="Output format (wav, mp3, etc.)")
 ):
-    """
-    Modify an audio file by applying a modification at the specified time range.
-    """
-    #Validate file type
     if not audio_file.content_type.startswith("audio/"):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="File must be an audio file")
 
-    #Validate modification type
     if modification_type not in ["mute", "tone"]:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Modification type must be 'mute' or 'tone'")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                            detail="Modification type must be 'mute' or 'tone'")
 
-    #Validate time range
     if start_time >= end_time:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Start time must be less than end time")
 
-    #Save uploaded file temporarily
     temp_file_path = os.path.join(TEMP_DIR, audio_file.filename)
 
     try:
@@ -164,7 +164,8 @@ async def modify_audio_endpoint(
         )
 
     except Exception as e:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Error modifying audio: {str(e)}")
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                            detail=f"Error modifying audio: {str(e)}")
 
     finally:
         if os.path.exists(temp_file_path):
@@ -174,12 +175,93 @@ async def modify_audio_endpoint(
                 print(f"Warning: Could not remove temporary file {temp_file_path}: {e}")
 
 
+@app.post("/audio-api/replace-with-tts")
+async def replace_with_tts_endpoint(
+    audio_file: UploadFile = File(..., description="Audio file to modify"),
+    start_time: float = Form(..., description="Start time in seconds"),
+    replacement_text: str = Form(..., description="Text to synthesize and insert"),
+    output_format: str = Form("wav", description="Output format (wav, mp3, etc.)"),
+    use_edge_tts: bool = Form(False, description="Whether to use Edge TTS (True) or Tortoise TTS (False)"),
+    end_time: Optional[float] = Form(None, description="End time in seconds (optional)"),
+    gender: Optional[str] = Form(None,
+                                 description="Specify gender for TTS voice ('male' or 'female'). If not provided, it will be auto-detected.")
+):
+    from audio.audio_modifier import TTS_MODEL_LOADED
+
+    if not audio_file.content_type.startswith("audio/"):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                            detail=f"File must be an audio file. Got content type: {audio_file.content_type}")
+
+    if end_time is not None and start_time >= end_time:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                            detail=f"Start time ({start_time}) must be less than end time ({end_time})")
+
+    # Validate gender parameter if provided
+    if gender is not None and gender.lower() not in ['male', 'female']:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                            detail=f"Gender must be either 'male' or 'female'. Got: {gender}")
+
+    temp_file_path = os.path.join(TEMP_DIR, audio_file.filename)
+
+    try:
+        os.makedirs(TEMP_DIR, exist_ok=True)
+
+        with open(temp_file_path, "wb") as buffer:
+            content = await audio_file.read()
+            buffer.write(content)
+
+        # Call the async version of replace_with_tts
+        file_bytes, content_type = await replace_with_tts(
+            temp_file_path,
+            start_time,
+            replacement_text,
+            output_format,
+            use_edge_tts,
+            "fast",  # preset
+            2,  # max_retries
+            end_time,
+            gender.lower() if gender else None  # Pass the gender parameter
+        )
+
+        return Response(
+            content=file_bytes,
+            media_type=content_type,
+            headers={
+                "Content-Disposition": f'attachment; filename="tts_replaced_{audio_file.filename}"'
+            }
+        )
+
+    except Exception as e:
+        import traceback
+        error_details = traceback.format_exc()
+        print(f"Error replacing audio with TTS: {e}\n{error_details}")
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                            detail=f"Error replacing audio with TTS: {str(e)}")
+
+    finally:
+        if os.path.exists(temp_file_path):
+            try:
+                os.remove(temp_file_path)
+            except Exception as e:
+                print(f"Warning: Could not remove temporary file {temp_file_path}: {e}")
+
 @app.get("/audio-api/health")
 async def health_check():
-    """Health check endpoint"""
-    return {"status": "healthy"}
+    from audio.audio_modifier import TTS_MODEL_LOADED
+    return {
+        "status": "healthy",
+        "tts_model_loaded": TTS_MODEL_LOADED
+    }
+
+
+@app.get("/audio-api/tts-status")
+async def tts_status():
+    from audio.audio_modifier import TTS_MODEL_LOADED
+    return {
+        "tts_model_loaded": TTS_MODEL_LOADED
+    }
+
 
 if __name__ == "__main__":
     print(f"Temporary directory created at: {TEMP_DIR}")
     uvicorn.run("main:app", host="0.0.0.0", port=8083)
-

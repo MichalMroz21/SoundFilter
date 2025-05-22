@@ -1,3 +1,5 @@
+version: '3.8'
+
 services:
   database:
     image: mysql:8.4.0
@@ -27,6 +29,21 @@ services:
       - AWS_DEFAULT_REGION=eu-central-1
     volumes:
       - "localstack-data:/tmp/localstack_data"
+    networks:
+      - app_net
+      
+  s3-init:
+    image: amazon/aws-cli:latest
+    container_name: s3-init
+    depends_on:
+      - localstack
+    environment:
+      - AWS_ACCESS_KEY_ID=test
+      - AWS_SECRET_ACCESS_KEY=test
+      - AWS_DEFAULT_REGION=eu-central-1
+    volumes:
+      - "./init-s3.sh:/init-s3.sh"
+    entrypoint: ["/bin/bash", "/init-s3.sh"]
     networks:
       - app_net
       

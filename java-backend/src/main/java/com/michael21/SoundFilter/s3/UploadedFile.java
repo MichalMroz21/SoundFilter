@@ -43,6 +43,12 @@ public class UploadedFile extends AbstractEntity {
         this.createdAt = LocalDateTime.now();
     }
 
+    /**
+     * Builds a path for storing a file in S3.
+     *
+     * @param path Path segments to include
+     * @return The complete file path
+     */
     public String buildPath(String ...path){
         StringBuilder sb = new StringBuilder();
         sb.append("user:").append(user.getId()).append("/");
@@ -53,6 +59,26 @@ public class UploadedFile extends AbstractEntity {
 
         sb.append(UUID.randomUUID());
         sb.append(".").append(extension);
+
+        return sb.toString();
+    }
+
+    /**
+     * Builds a path for storing a file in S3 with a specific filename.
+     *
+     * @param filename The filename to use (including extension)
+     * @param path Path segments to include
+     * @return The complete file path
+     */
+    public String buildPathWithFilename(String filename, String ...path){
+        StringBuilder sb = new StringBuilder();
+        sb.append("user:").append(user.getId()).append("/");
+
+        for (String p : path){
+            sb.append(p).append("/");
+        }
+
+        sb.append(filename);
 
         return sb.toString();
     }

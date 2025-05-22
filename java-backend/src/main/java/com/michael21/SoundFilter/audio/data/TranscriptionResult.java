@@ -9,10 +9,21 @@ public class TranscriptionResult {
     private String filename;
     private String transcript;
     private List<WordTimestamp> words;
-    private @JsonProperty("detected_language") String detectedLanguage;
-    private @JsonProperty("processing_time") double processingTime;
 
-    public record WordTimestamp(String word,
-                                @JsonProperty("start_time") double startTime,
-                                @JsonProperty("end_time") double endTime) {}
+    @JsonProperty("detected_language")
+    private String detectedLanguage;
+
+    @JsonProperty("processing_time")
+    private double processingTime;
+
+    @Data
+    public static class WordTimestamp {
+        private String word;
+
+        @JsonProperty("start_time")
+        private double startTime;
+
+        @JsonProperty("end_time")
+        private double endTime;
+    }
 }
