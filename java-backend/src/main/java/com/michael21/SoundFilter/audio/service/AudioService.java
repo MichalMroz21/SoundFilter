@@ -14,6 +14,8 @@ import com.michael21.SoundFilter.users.repository.AudioProjectRepository;
 import com.michael21.SoundFilter.users.repository.UserRepository;
 import com.michael21.SoundFilter.util.exception.ApiException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -45,6 +47,9 @@ public class AudioService {
     private final ObjectMapper objectMapper;
     private final ApplicationProperties applicationProperties;
     private final RestTemplate restTemplate;
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
     public AudioProject getAudioProject(User user, Long projectId) {
         AudioProject audioProject = audioProjectRepository.findById(projectId)
@@ -80,11 +85,14 @@ public class AudioService {
         AudioProject createdProject = new AudioProject(name, description, user, file, url,
                 uploadedFile.getCreatedAt(), uploadedFile.getExtension());
 
-        AudioProject savedProject = audioProjectRepository.save(createdProject);
+        AudioProject savedProject = audioProjectRepository.saveAndFlush(createdProject);
 
         user.addAudioProject(savedProject);
 
-        userRepository.save(user);
+        userRepository.saveAndFlush(user);
+
+        // Force flush to ensure all changes are written to the database
+        entityManager.flush();
 
         return new UserResponse(user);
     }
@@ -150,7 +158,7 @@ public class AudioService {
 
             audioProject.setTranscriptionText(result.getTranscript());
             audioProject.setUpdatedAt(LocalDateTime.now());
-            audioProjectRepository.save(audioProject);
+            audioProjectRepository.saveAndFlush(audioProject);
 
             return result;
 
@@ -165,6 +173,7 @@ public class AudioService {
 
     @Transactional
     public AudioModificationResponse muteAudio(User user, Long projectId, Double startTime, Double endTime) {
+        log.info("Starting muteAudio operation for project {}", projectId);
         AudioProject audioProject = getAudioProject(user, projectId);
         String audioUrl = audioProject.getAudioUrl();
 
@@ -253,19 +262,22 @@ public class AudioService {
 
             // Upload the modified audio to S3 - buildPath() will generate a new UUID
             String filePath = uploadedFile.buildPath("audio-file");
-            log.info("DEBUG - Generated new file path: {}", filePath);
+            log.info("Generated new file path: {}", filePath);
             String newAudioUrl = fileService.uploadFile(filePath, modifiedAudio);
-            log.info("DEBUG - New audio URL from S3: {}", newAudioUrl);
+            log.info("New audio URL from S3: {}", newAudioUrl);
 
             uploadedFile.onUploaded(newAudioUrl);
-            uploadedFileRepository.save(uploadedFile);
+            uploadedFileRepository.saveAndFlush(uploadedFile);
 
             // Update the project with the new audio URL
             audioProject.setAudioUrl(newAudioUrl);
             audioProject.setUpdatedAt(LocalDateTime.now());
-            audioProjectRepository.save(audioProject);
+            audioProjectRepository.saveAndFlush(audioProject);
 
-            log.info("DEBUG - Final audio URL in project: {}", audioProject.getAudioUrl());
+            // Force flush and clear the persistence context to ensure changes are committed
+            // and the cache is cleared
+            entityManager.flush();
+            entityManager.clear();
 
             // Return simplified response with just the project ID and new audio URL
             return new AudioModificationResponse(projectId, newAudioUrl);
@@ -275,6 +287,132 @@ public class AudioService {
             throw ApiException.builder()
                     .status(HttpServletResponse.SC_INTERNAL_SERVER_ERROR)
                     .message("Error muting audio: " + e.getMessage())
+                    .build();
+        }
+    }
+
+    @Transactional
+    public AudioModificationResponse replaceWithTone(
+            User user,
+            Long projectId,
+            Double startTime,
+            Double endTime,
+            Integer toneFrequency) {
+
+        log.info("Starting replaceWithTone operation for project {}", projectId);
+        AudioProject audioProject = getAudioProject(user, projectId);
+        String audioUrl = audioProject.getAudioUrl();
+
+        if (audioUrl == null || audioUrl.isEmpty()) {
+            throw ApiException.builder()
+                    .status(HttpServletResponse.SC_BAD_REQUEST)
+                    .message("Audio URL is missing for this project")
+                    .build();
+        }
+
+        String originalFileName = audioUrl.substring(audioUrl.lastIndexOf("/") + 1);
+
+        byte[] audioData;
+
+        try {
+            log.info("Downloading audio file from URL: {}", audioUrl);
+            URL url = new URL(audioUrl);
+            try (InputStream in = url.openStream()) {
+                audioData = in.readAllBytes();
+            }
+
+            log.info("Successfully downloaded {} bytes", audioData.length);
+        } catch (IOException e) {
+            log.error("Error downloading audio file: {}", e.getMessage(), e);
+            throw ApiException.builder()
+                    .status(HttpServletResponse.SC_INTERNAL_SERVER_ERROR)
+                    .message("Error downloading audio file: " + e.getMessage())
+                    .build();
+        }
+
+        try {
+            log.info("Sending audio file to Python API for tone replacement");
+
+            MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+
+            ByteArrayResource resource = new ByteArrayResource(audioData) {
+                @Override
+                public String getFilename() {
+                    return originalFileName;
+                }
+            };
+
+            body.add("audio_file", resource);
+            body.add("start_time", startTime.toString());
+            body.add("end_time", endTime.toString());
+            body.add("modification_type", "tone");
+            body.add("tone_frequency", toneFrequency.toString());
+            body.add("output_format", audioProject.getAudioFormat());
+
+            log.info("Sending parameters to Python API: start_time={}, end_time={}, modification_type=tone, tone_frequency={}, output_format={}",
+                    startTime, endTime, toneFrequency, audioProject.getAudioFormat());
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+
+            HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
+
+            byte[] modifiedAudio = restTemplate.postForObject(
+                    applicationProperties.getBaseUrl() + "/audio-api/modify",
+                    requestEntity,
+                    byte[].class
+            );
+
+            if (modifiedAudio == null || modifiedAudio.length == 0) {
+                throw new RuntimeException("Received empty response from Python API");
+            }
+
+            log.info("Received modified audio: {} bytes", modifiedAudio.length);
+
+            // Try to delete the old file
+            try {
+                String oldFilePath = extractFilePathFromUrl(audioProject.getAudioUrl());
+                if (oldFilePath != null) {
+                    fileService.deleteFile(oldFilePath);
+                    log.info("Deleted old audio file: {}", oldFilePath);
+                }
+            } catch (Exception e) {
+                log.warn("Could not delete old audio file: {}", e.getMessage());
+            }
+
+            // Generate a new unique filename for the modified audio
+            String newFileName = UUID.randomUUID().toString() + "." + audioProject.getAudioFormat();
+            String filePath = "user:" + user.getId() + "/audio-file/" + newFileName;
+            String newAudioUrl = fileService.uploadFile(filePath, modifiedAudio);
+
+            log.info("New audio URL from S3: {}", newAudioUrl);
+
+            // Create and save the uploaded file record
+            UploadedFile uploadedFile = new UploadedFile(
+                    originalFileName,
+                    (long) modifiedAudio.length,
+                    user
+            );
+            uploadedFile.onUploaded(newAudioUrl);
+            uploadedFileRepository.saveAndFlush(uploadedFile);
+
+            // Update the project with the new audio URL
+            audioProject.setAudioUrl(newAudioUrl);
+            audioProject.setUpdatedAt(LocalDateTime.now());
+            audioProjectRepository.saveAndFlush(audioProject);
+
+            // Force flush and clear the persistence context
+            entityManager.flush();
+            entityManager.clear();
+
+            // Return the new audio URL in the response
+            return new AudioModificationResponse(projectId, newAudioUrl);
+
+        } catch (Exception e) {
+            log.error("Error replacing with tone: {}", e.getMessage(), e);
+            throw ApiException.builder()
+                    .status(HttpServletResponse.SC_INTERNAL_SERVER_ERROR)
+                    .message("Error replacing with tone: " + e.getMessage())
                     .build();
         }
     }
@@ -290,6 +428,7 @@ public class AudioService {
             String gender,
             String outputFormat) {
 
+        log.info("Starting replaceWithTts operation for project {}", projectId);
         AudioProject audioProject = getAudioProject(user, projectId);
         String audioUrl = audioProject.getAudioUrl();
 
@@ -369,15 +508,42 @@ public class AudioService {
                 throw new RuntimeException("Received empty response from Python API");
             }
 
+            // Try to delete the old file
+            try {
+                String oldFilePath = extractFilePathFromUrl(audioProject.getAudioUrl());
+                if (oldFilePath != null) {
+                    fileService.deleteFile(oldFilePath);
+                    log.info("Deleted old audio file: {}", oldFilePath);
+                }
+            } catch (Exception e) {
+                log.warn("Could not delete old audio file: {}", e.getMessage());
+            }
+
             // Generate a new unique filename for the modified audio
             String newFileName = UUID.randomUUID().toString() + "." + outputFormat;
             String filePath = "user:" + user.getId() + "/audio-file/" + newFileName;
             String newAudioUrl = fileService.uploadFile(filePath, modifiedAudio);
 
+            log.info("New audio URL from S3: {}", newAudioUrl);
+
+            // Create and save the uploaded file record
+            UploadedFile uploadedFile = new UploadedFile(
+                    originalFileName,
+                    (long) modifiedAudio.length,
+                    user
+            );
+            uploadedFile.onUploaded(newAudioUrl);
+            uploadedFileRepository.saveAndFlush(uploadedFile);
+
             // Update the project with the new audio URL
             audioProject.setAudioUrl(newAudioUrl);
             audioProject.setUpdatedAt(LocalDateTime.now());
-            audioProjectRepository.save(audioProject);
+            audioProjectRepository.saveAndFlush(audioProject);
+
+            // Force flush and clear the persistence context to ensure changes are committed
+            // and the cache is cleared
+            entityManager.flush();
+            entityManager.clear();
 
             // Return the new audio URL in the response
             return new AudioModificationResponse(projectId, newAudioUrl);
@@ -387,6 +553,129 @@ public class AudioService {
             throw ApiException.builder()
                     .status(HttpServletResponse.SC_INTERNAL_SERVER_ERROR)
                     .message("Error replacing with TTS: " + e.getMessage())
+                    .build();
+        }
+    }
+
+    @Transactional
+    public AudioModificationResponse convertAudioFormat(User user, Long projectId, String targetFormat) {
+        log.info("Starting convertAudioFormat operation for project {} to format {}", projectId, targetFormat);
+        AudioProject audioProject = getAudioProject(user, projectId);
+        String audioUrl = audioProject.getAudioUrl();
+
+        if (audioUrl == null || audioUrl.isEmpty()) {
+            throw ApiException.builder()
+                    .status(HttpServletResponse.SC_BAD_REQUEST)
+                    .message("Audio URL is missing for this project")
+                    .build();
+        }
+
+        // Check if already in target format
+        if (targetFormat.equalsIgnoreCase(audioProject.getAudioFormat())) {
+            throw ApiException.builder()
+                    .status(HttpServletResponse.SC_BAD_REQUEST)
+                    .message("Audio is already in " + targetFormat + " format")
+                    .build();
+        }
+
+        String originalFileName = audioUrl.substring(audioUrl.lastIndexOf("/") + 1);
+
+        byte[] audioData;
+        try {
+            log.info("Downloading audio file from URL: {}", audioUrl);
+            URL url = new URL(audioUrl);
+            try (InputStream in = url.openStream()) {
+                audioData = in.readAllBytes();
+            }
+            log.info("Successfully downloaded {} bytes", audioData.length);
+        } catch (IOException e) {
+            log.error("Error downloading audio file: {}", e.getMessage(), e);
+            throw ApiException.builder()
+                    .status(HttpServletResponse.SC_INTERNAL_SERVER_ERROR)
+                    .message("Error downloading audio file: " + e.getMessage())
+                    .build();
+        }
+
+        try {
+            log.info("Sending audio file to Python API for format conversion");
+
+            MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+
+            ByteArrayResource resource = new ByteArrayResource(audioData) {
+                @Override
+                public String getFilename() {
+                    return originalFileName;
+                }
+            };
+
+            body.add("audio_file", resource);
+            body.add("target_format", targetFormat);
+
+            log.info("Sending parameters to Python API: target_format={}", targetFormat);
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+
+            HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
+
+            byte[] convertedAudio = restTemplate.postForObject(
+                    applicationProperties.getBaseUrl() + "/audio-api/convert-format",
+                    requestEntity,
+                    byte[].class
+            );
+
+            if (convertedAudio == null || convertedAudio.length == 0) {
+                throw new RuntimeException("Received empty response from Python API");
+            }
+
+            log.info("Received converted audio: {} bytes", convertedAudio.length);
+
+            // Try to delete the old file
+            try {
+                String oldFilePath = extractFilePathFromUrl(audioProject.getAudioUrl());
+                if (oldFilePath != null) {
+                    fileService.deleteFile(oldFilePath);
+                    log.info("Deleted old audio file: {}", oldFilePath);
+                }
+            } catch (Exception e) {
+                log.warn("Could not delete old audio file: {}", e.getMessage());
+            }
+
+            // Generate a new unique filename for the converted audio
+            String newFileName = UUID.randomUUID().toString() + "." + targetFormat;
+            String filePath = "user:" + user.getId() + "/audio-file/" + newFileName;
+            String newAudioUrl = fileService.uploadFile(filePath, convertedAudio);
+
+            log.info("New audio URL from S3: {}", newAudioUrl);
+
+            // Create and save the uploaded file record
+            UploadedFile uploadedFile = new UploadedFile(
+                    originalFileName.substring(0, originalFileName.lastIndexOf('.')) + "." + targetFormat,
+                    (long) convertedAudio.length,
+                    user
+            );
+            uploadedFile.onUploaded(newAudioUrl);
+            uploadedFileRepository.saveAndFlush(uploadedFile);
+
+            // Update the project with the new audio URL and format
+            audioProject.setAudioUrl(newAudioUrl);
+            audioProject.setAudioFormat(targetFormat);
+            audioProject.setFileSize((long) convertedAudio.length);
+            audioProject.setUpdatedAt(LocalDateTime.now());
+            audioProjectRepository.saveAndFlush(audioProject);
+
+            // Force flush and clear the persistence context
+            entityManager.flush();
+            entityManager.clear();
+
+            // Return the new audio URL in the response
+            return new AudioModificationResponse(projectId, newAudioUrl);
+
+        } catch (Exception e) {
+            log.error("Error converting audio format: {}", e.getMessage(), e);
+            throw ApiException.builder()
+                    .status(HttpServletResponse.SC_INTERNAL_SERVER_ERROR)
+                    .message("Error converting audio format: " + e.getMessage())
                     .build();
         }
     }

@@ -17,6 +17,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 @Slf4j
 @RestController
 @RequestMapping("/api/audio")
@@ -85,6 +87,60 @@ public class AudioController {
         }
     }
 
+    @PostMapping("/{project_id}/replace-with-tone")
+    public ResponseEntity<AudioModificationResponse> replaceWithTone(
+            @AuthenticationPrincipal User user,
+            @PathVariable Long project_id,
+            @RequestParam("start_time") Double start_time,
+            @RequestParam("end_time") Double end_time,
+            @RequestParam(value = "tone_frequency", required = false, defaultValue = "440") Integer tone_frequency
+    ) {
+        try {
+            log.info("Replace with tone request received - Project ID: {}, Start Time: {}, End Time: {}, Frequency: {}",
+                    project_id, start_time, end_time, tone_frequency);
+
+            if (start_time == null || end_time == null) {
+                throw ApiException.builder()
+                        .status(HttpServletResponse.SC_BAD_REQUEST)
+                        .message("Start time and end time are required")
+                        .build();
+            }
+
+            if (start_time >= end_time) {
+                throw ApiException.builder()
+                        .status(HttpServletResponse.SC_BAD_REQUEST)
+                        .message("Start time must be less than end time")
+                        .build();
+            }
+
+            // Validate frequency range
+            if (tone_frequency != null && (tone_frequency < 20 || tone_frequency > 20000)) {
+                throw ApiException.builder()
+                        .status(HttpServletResponse.SC_BAD_REQUEST)
+                        .message("Tone frequency must be between 20 and 20000 Hz")
+                        .build();
+            }
+
+            AudioModificationResponse response = audioService.replaceWithTone(
+                    user,
+                    project_id,
+                    start_time,
+                    end_time,
+                    tone_frequency
+            );
+            return ResponseEntity.ok(response);
+        } catch (ApiException e) {
+            log.error("API Exception in replace with tone: {}", e.getMessage());
+            throw e;
+        } catch (Exception e) {
+            log.error("Error replacing with tone: {}", e.getMessage(), e);
+            throw ApiException.builder()
+                    .status(HttpServletResponse.SC_INTERNAL_SERVER_ERROR)
+                    .message("Error processing audio: " + e.getMessage())
+                    .build();
+        }
+    }
+
     @PostMapping("/{project_id}/replace-with-tts")
     public ResponseEntity<AudioModificationResponse> replaceWithTts(
             @AuthenticationPrincipal User user,
@@ -140,6 +196,46 @@ public class AudioController {
             throw ApiException.builder()
                     .status(HttpServletResponse.SC_INTERNAL_SERVER_ERROR)
                     .message("Error processing audio: " + e.getMessage())
+                    .build();
+        }
+    }
+
+    @PostMapping("/{project_id}/convert-format")
+    public ResponseEntity<AudioModificationResponse> convertAudioFormat(
+            @AuthenticationPrincipal User user,
+            @PathVariable Long project_id,
+            @RequestParam("target_format") String target_format
+    ) {
+        try {
+            log.info("Convert audio format request received - Project ID: {}, Target Format: {}",
+                    project_id, target_format);
+
+            if (target_format == null || target_format.trim().isEmpty()) {
+                throw ApiException.builder()
+                        .status(HttpServletResponse.SC_BAD_REQUEST)
+                        .message("Target format is required")
+                        .build();
+            }
+
+            // Validate supported formats
+            List<String> supportedFormats = List.of("mp3", "wav", "flac", "aac", "ogg", "m4a");
+            if (!supportedFormats.contains(target_format.toLowerCase())) {
+                throw ApiException.builder()
+                        .status(HttpServletResponse.SC_BAD_REQUEST)
+                        .message("Unsupported audio format: " + target_format)
+                        .build();
+            }
+
+            AudioModificationResponse response = audioService.convertAudioFormat(user, project_id, target_format);
+            return ResponseEntity.ok(response);
+        } catch (ApiException e) {
+            log.error("API Exception in convert audio format: {}", e.getMessage());
+            throw e;
+        } catch (Exception e) {
+            log.error("Error converting audio format: {}", e.getMessage(), e);
+            throw ApiException.builder()
+                    .status(HttpServletResponse.SC_INTERNAL_SERVER_ERROR)
+                    .message("Error converting audio format: " + e.getMessage())
                     .build();
         }
     }

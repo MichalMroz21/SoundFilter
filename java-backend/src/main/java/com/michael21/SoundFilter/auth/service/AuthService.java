@@ -1,12 +1,13 @@
 package com.michael21.SoundFilter.auth.service;
 
-
 import com.michael21.SoundFilter.auth.SecurityUtil;
 import com.michael21.SoundFilter.auth.data.LoginRequest;
 import com.michael21.SoundFilter.users.User;
 import com.michael21.SoundFilter.users.data.UserResponse;
 import com.michael21.SoundFilter.users.repository.UserRepository;
 import org.springframework.security.core.AuthenticationException;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -30,8 +31,12 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class AuthService {
     private final AuthenticationManager authenticationManager;
+    private final UserRepository userRepository;
     private SecurityContextRepository securityContextRepository = new HttpSessionSecurityContextRepository();
     SecurityContextLogoutHandler logoutHandler = new SecurityContextLogoutHandler();
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
     public void login(HttpServletRequest request,
                       HttpServletResponse response,
@@ -45,9 +50,18 @@ public class AuthService {
         securityContextRepository.saveContext(context, request, response);
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public UserResponse getSession(HttpServletRequest request) {
+        entityManager.clear();
+
         User user = SecurityUtil.getAuthenticatedUser();
+
+        user = userRepository.findById(user.getId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        log.debug("User has {} audio projects",
+                user.getAudioProjects() != null ? user.getAudioProjects().size() : 0);
+
         return new UserResponse(user);
     }
 

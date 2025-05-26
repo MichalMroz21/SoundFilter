@@ -119,4 +119,18 @@
   body {
     @apply bg-background text-foreground;
   }
+  /* Prevent cursor on non-editable elements */
+  *:not(input):not(textarea):not([contenteditable="true"]) {
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+  }
+  /* Only show cursor on editable elements */
+  input, textarea, [contenteditable="true"] {
+    user-select: text;
+    -webkit-user-select: text;
+    -moz-user-select: text;
+    -ms-user-select: text;
+  }
 }
