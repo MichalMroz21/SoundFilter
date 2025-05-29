@@ -3076,6 +3076,9 @@ const BatchAudioModificationOptions: React.FC<BatchAudioModificationOptionsProps
               <Label htmlFor="batch-useEdgeTts">Use Edge TTS (faster)</Label>
               <Switch id="batch-useEdgeTts" checked={useEdgeTts} onCheckedChange={setUseEdgeTts} />
             </div>
+            <p className="text-xs text-muted-foreground">
+              Edge TTS is faster but has less natural voice. Tortoise TTS provides better voice cloning but is slower.
+            </p>
           </div>
 
           <div className="space-y-2">
@@ -3083,6 +3086,10 @@ const BatchAudioModificationOptions: React.FC<BatchAudioModificationOptionsProps
               <Label htmlFor="batch-useFixedDuration">Use fixed duration</Label>
               <Switch id="batch-useFixedDuration" checked={useFixedDuration} onCheckedChange={setUseFixedDuration} />
             </div>
+            <p className="text-xs text-muted-foreground">
+              When enabled, TTS will fit exactly into the selected time range. When disabled, TTS duration will be
+              determined automatically by the speech length.
+            </p>
           </div>
 
           {useEdgeTts && (
@@ -3102,6 +3109,7 @@ const BatchAudioModificationOptions: React.FC<BatchAudioModificationOptionsProps
                   <Label htmlFor="batch-female">Female</Label>
                 </div>
               </RadioGroup>
+              <p className="text-xs text-muted-foreground">Select the voice gender for Edge TTS synthesis.</p>
             </div>
           )}
         </div>
